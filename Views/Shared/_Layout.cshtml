@@ -69,9 +69,9 @@
             
             <!-- Botão Sair na parte inferior da sidebar -->
             <div class="sidebar-footer p-3 border-top border-secondary mt-auto">
-                <a class="nav-link text-danger sidebar-link" href="@Url.Action("Logout", "Home")" 
-                   onclick="return confirm('Tem certeza que deseja sair?')" 
-                   data-bs-toggle="tooltip" title="Sair">
+                <a class="nav-link text-danger sidebar-link" href="#" 
+                   data-bs-toggle="modal" data-bs-target="#logoutModal" 
+                   id="logoutSidebarBtn">
                     <i class="bi bi-box-arrow-right me-2"></i>
                     <span class="sidebar-text">Sair</span>
                 </a>
@@ -100,6 +100,28 @@
                 </div>
             </footer>
         </div>
+    </div>
+    
+    <!-- Modal de confirmação de logout -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title" id="logoutModalLabel">
+              <i class="bi bi-box-arrow-right me-2 text-danger"></i>
+              Sair do sistema
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body text-center">
+            <p class="mb-0" style="font-size:1.1em;">Tem certeza que deseja sair?</p>
+          </div>
+          <div class="modal-footer border-0 justify-content-center gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <a id="logoutConfirmBtn" href="@Url.Action("Logout", "Home")" class="btn btn-danger px-4">Sair</a>
+          </div>
+        </div>
+      </div>
     </div>
     
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

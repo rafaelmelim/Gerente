@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "vDv7hBsonxq/GJ+aL1GVeqZwSw8nUJAVHSB632DhAc8=",
+  "Hash": "CZ0a9KWf6YKW+8BgrFQA3yWm0R/uuWCuyQp8V9GsyPA=",
   "Source": "Gerente",
   "BasePath": "_content/Gerente",
   "Mode": "Default",
@@ -72,6 +72,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\login.css"
+    },
+    {
+      "Identity": "C:\\Projetos\\Gerente\\wwwroot\\css\\messages.css",
+      "SourceId": "Gerente",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Projetos\\Gerente\\wwwroot\\",
+      "BasePath": "_content/Gerente",
+      "RelativePath": "css/messages.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\messages.css"
     },
     {
       "Identity": "C:\\Projetos\\Gerente\\wwwroot\\css\\site.css",

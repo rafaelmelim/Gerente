@@ -9,6 +9,10 @@
       "PackagePath": "staticwebassets\\css\\login.css"
     },
     {
+      "Id": "C:\\Projetos\\Gerente\\wwwroot\\css\\messages.css",
+      "PackagePath": "staticwebassets\\css\\messages.css"
+    },
+    {
       "Id": "C:\\Projetos\\Gerente\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },

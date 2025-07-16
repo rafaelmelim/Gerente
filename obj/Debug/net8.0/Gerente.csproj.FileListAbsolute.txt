@@ -33,3 +33,4 @@ C:\Projetos\Gerente\obj\Debug\net8.0\refint\Gerente.dll
 C:\Projetos\Gerente\obj\Debug\net8.0\Gerente.pdb
 C:\Projetos\Gerente\obj\Debug\net8.0\Gerente.genruntimeconfig.cache
 C:\Projetos\Gerente\obj\Debug\net8.0\ref\Gerente.dll
+C:\Projetos\Gerente\obj\Debug\net8.0\Gerente.sourcelink.json
