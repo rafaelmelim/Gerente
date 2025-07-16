@@ -1,0 +1,118 @@
+﻿@{
+    ViewData["Title"] = "Página Principal";
+    var username = Context.Session.GetString("Username");
+}
+
+<div class="container-fluid">
+    <!-- Header da página -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">Bem-vindo, @username!</h2>
+                    <p class="text-muted mb-0">Escolha uma das opções no menu lateral para começar</p>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Último acesso: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards das funcionalidades -->
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-speedometer2 text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="card-title">Dashboard</h5>
+                    <p class="card-text">Visualize métricas e resumos gerais do sistema em tempo real.</p>
+                    <button class="btn btn-outline-primary btn-sm">Acessar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-folder-fill text-success" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="card-title">Projetos</h5>
+                    <p class="card-text">Gerencie seus projetos, tarefas e acompanhe o progresso.</p>
+                    <button class="btn btn-outline-success btn-sm">Acessar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-people-fill text-info" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="card-title">Usuários</h5>
+                    <p class="card-text">Administre usuários, permissões e configurações do sistema.</p>
+                    <button class="btn btn-outline-info btn-sm">Acessar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-graph-up text-warning" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="card-title">Relatórios</h5>
+                    <p class="card-text">Gere relatórios detalhados e análises de performance.</p>
+                    <button class="btn btn-outline-warning btn-sm">Acessar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de estatísticas rápidas -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart me-2"></i>
+                        Estatísticas Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border-end">
+                                <h4 class="text-primary mb-1">12</h4>
+                                <small class="text-muted">Projetos Ativos</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border-end">
+                                <h4 class="text-success mb-1">8</h4>
+                                <small class="text-muted">Tarefas Concluídas</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="border-end">
+                                <h4 class="text-info mb-1">25</h4>
+                                <small class="text-muted">Usuários Ativos</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div>
+                                <h4 class="text-warning mb-1">95%</h4>
+                                <small class="text-muted">Satisfação</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

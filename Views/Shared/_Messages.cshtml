@@ -1,0 +1,153 @@
+@{
+    var successMessage = TempData["Sucesso"]?.ToString();
+    var errorMessage = TempData["Erro"]?.ToString();
+    var warningMessage = TempData["Aviso"]?.ToString();
+    var infoMessage = TempData["Info"]?.ToString();
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="message-container message-success" data-message-type="success">
+        <div class="message-content">
+            <div class="message-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="message-text">
+                <span>@successMessage</span>
+            </div>
+            <button type="button" class="message-close" onclick="closeMessage(this)">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="message-container message-error" data-message-type="error">
+        <div class="message-content">
+            <div class="message-icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="message-text">
+                <span>@errorMessage</span>
+            </div>
+            <button type="button" class="message-close" onclick="closeMessage(this)">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(warningMessage))
+{
+    <div class="message-container message-warning" data-message-type="warning">
+        <div class="message-content">
+            <div class="message-icon">
+                <i class="bi bi-exclamation-circle-fill"></i>
+            </div>
+            <div class="message-text">
+                <span>@warningMessage</span>
+            </div>
+            <button type="button" class="message-close" onclick="closeMessage(this)">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(infoMessage))
+{
+    <div class="message-container message-info" data-message-type="info">
+        <div class="message-content">
+            <div class="message-icon">
+                <i class="bi bi-info-circle-fill"></i>
+            </div>
+            <div class="message-text">
+                <span>@infoMessage</span>
+            </div>
+            <button type="button" class="message-close" onclick="closeMessage(this)">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+}
+
+<script>
+    // Sistema de mensagens de alta performance
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-hide para mensagens de sucesso após 5 segundos
+        const successMessages = document.querySelectorAll('.message-success');
+        successMessages.forEach(function(message) {
+            setTimeout(function() {
+                if (message.parentNode) {
+                    closeMessage(message.querySelector('.message-close'));
+                }
+            }, 5000);
+        });
+
+        // Animações de entrada
+        const messages = document.querySelectorAll('.message-container');
+        messages.forEach(function(message, index) {
+            message.style.animationDelay = (index * 0.1) + 's';
+            message.classList.add('message-show');
+        });
+    });
+
+    function closeMessage(button) {
+        const messageContainer = button.closest('.message-container');
+        if (messageContainer) {
+            messageContainer.classList.add('message-hide');
+            setTimeout(function() {
+                if (messageContainer.parentNode) {
+                    messageContainer.parentNode.removeChild(messageContainer);
+                }
+            }, 300);
+        }
+    }
+
+    // Função global para mostrar mensagens via JavaScript
+    window.showMessage = function(type, text, duration = 5000) {
+        const messageTypes = {
+            'success': { icon: 'bi-check-circle-fill', class: 'message-success' },
+            'error': { icon: 'bi-exclamation-triangle-fill', class: 'message-error' },
+            'warning': { icon: 'bi-exclamation-circle-fill', class: 'message-warning' },
+            'info': { icon: 'bi-info-circle-fill', class: 'message-info' }
+        };
+
+        const config = messageTypes[type];
+        if (!config) return;
+
+        const messageHtml = `
+            <div class="message-container ${config.class}" data-message-type="${type}">
+                <div class="message-content">
+                    <div class="message-icon">
+                        <i class="${config.icon}"></i>
+                    </div>
+                    <div class="message-text">
+                        <span>${text}</span>
+                    </div>
+                    <button type="button" class="message-close" onclick="closeMessage(this)">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        const messageContainer = document.createElement('div');
+        messageContainer.innerHTML = messageHtml;
+        const message = messageContainer.firstElementChild;
+
+        // Adicionar ao topo da página
+        const target = document.querySelector('.content-wrapper') || document.body;
+        target.insertBefore(message, target.firstChild);
+
+        // Animar entrada
+        setTimeout(() => message.classList.add('message-show'), 10);
+
+        // Auto-hide se especificado
+        if (duration > 0) {
+            setTimeout(() => closeMessage(message.querySelector('.message-close')), duration);
+        }
+    };
+</script> 

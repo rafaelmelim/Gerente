@@ -1,0 +1,211 @@
+@model Gerente.Models.ConfiguracaoEmail
+@{
+    ViewData["Title"] = "Configurações de E-mail";
+}
+
+<div class="container-fluid">
+    <!-- Header da página -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-envelope-fill me-2 text-primary"></i>
+                        Configurações de E-mail
+                    </h2>
+                    <p class="text-muted mb-0">Configure as configurações de SMTP para envio de e-mails</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Mensagens já está incluído no layout principal -->
+
+    <!-- Formulário de configurações -->
+    <div class="row">
+        <div class="col-lg-8 col-md-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear-fill me-2"></i>
+                        Configurações SMTP
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Salvar" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ServidorSmtp" class="form-label">
+                                    <i class="bi bi-server me-1"></i>
+                                    Servidor SMTP
+                                </label>
+                                <input asp-for="ServidorSmtp" class="form-control" placeholder="Ex: smtp.gmail.com" required />
+                                <span asp-validation-for="ServidorSmtp" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Porta" class="form-label">
+                                    <i class="bi bi-arrow-left-right me-1"></i>
+                                    Porta
+                                </label>
+                                <input asp-for="Porta" type="number" class="form-control" placeholder="Ex: 587" required />
+                                <span asp-validation-for="Porta" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EmailRemetente" class="form-label">
+                                    <i class="bi bi-envelope me-1"></i>
+                                    E-mail Remetente
+                                </label>
+                                <input asp-for="EmailRemetente" type="email" class="form-control" placeholder="sistema@empresa.com" required />
+                                <span asp-validation-for="EmailRemetente" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NomeRemetente" class="form-label">
+                                    <i class="bi bi-person me-1"></i>
+                                    Nome do Remetente
+                                </label>
+                                <input asp-for="NomeRemetente" class="form-control" placeholder="Sistema Gerente" required />
+                                <span asp-validation-for="NomeRemetente" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="UsuarioSmtp" class="form-label">
+                                    <i class="bi bi-person-badge me-1"></i>
+                                    Usuário SMTP
+                                </label>
+                                <input asp-for="UsuarioSmtp" class="form-control" placeholder="sistema@empresa.com" required />
+                                <span asp-validation-for="UsuarioSmtp" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="SenhaSmtp" class="form-label">
+                                    <i class="bi bi-key me-1"></i>
+                                    Senha SMTP
+                                </label>
+                                <input asp-for="SenhaSmtp" type="password" class="form-control" placeholder="Digite a senha" required />
+                                <span asp-validation-for="SenhaSmtp" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Informações adicionais -->
+                        @if (Model.Id > 0)
+                        {
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        Criado em: @Model.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>
+                                        Última atualização: @Model.DataAtualizacao.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Botões de ação -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    Voltar
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Salvar Configurações
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Card de informações -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Informações Importantes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Configurações Comuns:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Gmail:</strong> smtp.gmail.com:587</li>
+                                <li><strong>Outlook:</strong> smtp-mail.outlook.com:587</li>
+                                <li><strong>Yahoo:</strong> smtp.mail.yahoo.com:587</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-warning">Observações:</h6>
+                            <ul class="list-unstyled">
+                                <li>• Use senhas de aplicativo para Gmail</li>
+                                <li>• Verifique se o 2FA está ativado</li>
+                                <li>• Teste as configurações antes de usar</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('form').on('submit', function() {
+                var isValid = true;
+                
+                $('input[required]').each(function() {
+                    if (!$(this).val()) {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+                
+                var porta = parseInt($('#Porta').val());
+                if (porta && (porta < 1 || porta > 65535)) {
+                    $('#Porta').addClass('is-invalid');
+                    isValid = false;
+                }
+                
+                var email = $('#EmailRemetente').val();
+                if (email && !isValidEmail(email)) {
+                    $('#EmailRemetente').addClass('is-invalid');
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    alert('Por favor, preencha todos os campos obrigatórios corretamente.');
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            function isValidEmail(email) {
+                var atIndex = email.indexOf('@@');
+                var dotIndex = email.lastIndexOf('.');
+                return atIndex > 0 && dotIndex > atIndex && dotIndex < email.length - 1;
+            }
+        });
+    </script>
+} 
