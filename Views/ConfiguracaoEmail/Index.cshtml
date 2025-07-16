@@ -44,14 +44,25 @@
                                 <input asp-for="ServidorSmtp" class="form-control" placeholder="Ex: smtp.gmail.com" required />
                                 <span asp-validation-for="ServidorSmtp" class="text-danger"></span>
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label asp-for="Porta" class="form-label">
                                     <i class="bi bi-arrow-left-right me-1"></i>
                                     Porta
                                 </label>
                                 <input asp-for="Porta" type="number" class="form-control" placeholder="Ex: 587" required />
                                 <span asp-validation-for="Porta" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="SecurityMode" class="form-label">
+                                    <i class="bi bi-shield-lock me-1"></i>
+                                    Segurança
+                                </label>
+                                <select asp-for="SecurityMode" class="form-select" required>
+                                    <option value="None">Nenhuma</option>
+                                    <option value="SSL">SSL</option>
+                                    <option value="TLS">TLS</option>
+                                </select>
+                                <span asp-validation-for="SecurityMode" class="text-danger"></span>
                             </div>
                         </div>
 
@@ -123,6 +134,10 @@
                                 </a>
                             </div>
                             <div>
+                                <button type="button" id="btnTestarConexao" class="btn btn-info me-2">
+                                    <i class="bi bi-plug me-1"></i>
+                                    Testar Conexão
+                                </button>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-check-circle me-1"></i>
                                     Salvar Configurações
@@ -206,6 +221,36 @@
                 var dotIndex = email.lastIndexOf('.');
                 return atIndex > 0 && dotIndex > atIndex && dotIndex < email.length - 1;
             }
+
+            $('#btnTestarConexao').on('click', function(e) {
+                e.preventDefault();
+                var form = $(this).closest('form');
+                var data = form.serialize();
+                var btn = $(this);
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Testando...');
+                $.ajax({
+                    url: form.attr('action').replace('Salvar', 'TestarConexao'),
+                    type: 'POST',
+                    data: data,
+                    headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                    success: function(resp) {
+                        btn.prop('disabled', false).html('<i class="bi bi-plug me-1"></i> Testar Conexão');
+                        var alertClass = resp.sucesso ? 'alert-success' : 'alert-danger';
+                        var html = '<div class="alert ' + alertClass + ' alert-dismissible fade show mt-3" role="alert">' +
+                            resp.mensagem +
+                            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                            '</div>';
+                        form.find('.alert').remove();
+                        form.prepend(html);
+                    },
+                    error: function() {
+                        btn.prop('disabled', false).html('<i class="bi bi-plug me-1"></i> Testar Conexão');
+                        var html = '<div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">Erro inesperado ao testar conexão.<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                        form.find('.alert').remove();
+                        form.prepend(html);
+                    }
+                });
+            });
         });
     </script>
 } 
