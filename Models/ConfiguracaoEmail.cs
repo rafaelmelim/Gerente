@@ -1,3 +1,5 @@
+using System;
+
 namespace Gerente.Models
 {
     public class ConfiguracaoEmail
@@ -73,7 +75,7 @@ namespace Gerente.Models
             catch (Exception ex)
             {
 #if DEBUG
-                System.Diagnostics.Debug.WriteLine($"Erro ao descriptografar: {ex.Message} | Valor: {cipherText}");
+                Console.WriteLine($"Erro ao descriptografar: {ex.Message} | Valor: {cipherText}");
 #endif
                 // Fallback: retorna string vazia para não quebrar o sistema
                 return "";

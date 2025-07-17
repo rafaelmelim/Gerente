@@ -1,0 +1,360 @@
+@model Gerente.Models.UsuarioViewModel
+@{
+    ViewData["Title"] = "Editar Usuário";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-pencil-square me-2"></i>
+                Editar Usuário
+            </h1>
+            <p class="text-muted mb-0">Edite as informações do usuário</p>
+        </div>
+        <a href="@Url.Action("Index", "Usuario")" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>
+            Voltar
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" id="usuarioForm">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Id" type="hidden" />
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="Nome" class="form-label">
+                                    <i class="bi bi-person me-1"></i>
+                                    @Html.DisplayNameFor(m => m.Nome)
+                                </label>
+                                <input asp-for="Nome" class="form-control" placeholder="Digite o nome completo do usuário" />
+                                <span asp-validation-for="Nome" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="Email" class="form-label">
+                                    <i class="bi bi-envelope me-1"></i>
+                                    @Html.DisplayNameFor(m => m.Email)
+                                </label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="Digite o e-mail do usuário" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Este e-mail será usado para login e redefinição de senha
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Senha" class="form-label">
+                                    <i class="bi bi-lock me-1"></i>
+                                    Nova Senha
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="Senha" type="password" class="form-control" placeholder="Deixe em branco para manter a senha atual" id="senha" />
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleSenha">
+                                        <i class="bi bi-eye" id="toggleSenhaIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Senha" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-shield-check me-1"></i>
+                                    Mínimo 6 caracteres (opcional)
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ConfirmarSenha" class="form-label">
+                                    <i class="bi bi-lock-fill me-1"></i>
+                                    Confirmar Nova Senha
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="ConfirmarSenha" type="password" class="form-control" placeholder="Confirme a nova senha" id="confirmarSenha" />
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirmarSenha">
+                                        <i class="bi bi-eye" id="toggleConfirmarSenhaIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="ConfirmarSenha" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-calendar-plus me-1"></i>
+                                    Data de Criação
+                                </label>
+                                <input type="text" class="form-control" value="@Model.DataCriacao.ToString("dd/MM/yyyy HH:mm")" readonly />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    Última Alteração
+                                </label>
+                                <input type="text" class="form-control" value="@Model.DataAlteracao.ToString("dd/MM/yyyy HH:mm")" readonly />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="@Url.Action("Index", "Usuario")" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle me-2"></i>
+                                        Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Salvar Alterações
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('usuarioForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const senhaInput = document.getElementById('senha');
+    const confirmarSenhaInput = document.getElementById('confirmarSenha');
+    const toggleSenhaBtn = document.getElementById('toggleSenha');
+    const toggleConfirmarSenhaBtn = document.getElementById('toggleConfirmarSenha');
+    const toggleSenhaIcon = document.getElementById('toggleSenhaIcon');
+    const toggleConfirmarSenhaIcon = document.getElementById('toggleConfirmarSenhaIcon');
+
+    // Toggle de visibilidade da senha
+    toggleSenhaBtn.addEventListener('click', function() {
+        if (senhaInput.type === 'password') {
+            senhaInput.type = 'text';
+            toggleSenhaIcon.classList.remove('bi-eye');
+            toggleSenhaIcon.classList.add('bi-eye-slash');
+        } else {
+            senhaInput.type = 'password';
+            toggleSenhaIcon.classList.remove('bi-eye-slash');
+            toggleSenhaIcon.classList.add('bi-eye');
+        }
+    });
+
+    toggleConfirmarSenhaBtn.addEventListener('click', function() {
+        if (confirmarSenhaInput.type === 'password') {
+            confirmarSenhaInput.type = 'text';
+            toggleConfirmarSenhaIcon.classList.remove('bi-eye');
+            toggleConfirmarSenhaIcon.classList.add('bi-eye-slash');
+        } else {
+            confirmarSenhaInput.type = 'password';
+            toggleConfirmarSenhaIcon.classList.remove('bi-eye-slash');
+            toggleConfirmarSenhaIcon.classList.add('bi-eye');
+        }
+    });
+
+    // Validação em tempo real
+    function validarSenhas() {
+        const senha = senhaInput.value;
+        const confirmarSenha = confirmarSenhaInput.value;
+        
+        // Se a senha foi preenchida, validar
+        if (senha.length > 0) {
+            if (senha.length < 6) {
+                senhaInput.classList.add('is-invalid');
+                senhaInput.classList.remove('is-valid');
+            } else {
+                senhaInput.classList.remove('is-invalid');
+                senhaInput.classList.add('is-valid');
+            }
+            
+            // Se a confirmação foi preenchida, validar
+            if (confirmarSenha.length > 0) {
+                if (senha !== confirmarSenha) {
+                    confirmarSenhaInput.classList.add('is-invalid');
+                    confirmarSenhaInput.classList.remove('is-valid');
+                } else {
+                    confirmarSenhaInput.classList.remove('is-invalid');
+                    confirmarSenhaInput.classList.add('is-valid');
+                }
+            } else {
+                confirmarSenhaInput.classList.remove('is-invalid', 'is-valid');
+            }
+        } else {
+            // Se a senha está vazia, limpar validações
+            senhaInput.classList.remove('is-invalid', 'is-valid');
+            confirmarSenhaInput.classList.remove('is-invalid', 'is-valid');
+        }
+    }
+
+    senhaInput.addEventListener('input', validarSenhas);
+    confirmarSenhaInput.addEventListener('input', validarSenhas);
+
+    // Validação de e-mail em tempo real
+    const emailInput = document.getElementById('Email');
+    emailInput.addEventListener('input', function() {
+        const email = this.value.trim();
+        const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+        
+        if (email.length > 0) {
+            if (emailRegex.test(email)) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            }
+        } else {
+            this.classList.remove('is-invalid', 'is-valid');
+        }
+    });
+
+    // Submit do formulário
+    form.addEventListener('submit', function(e) {
+        const nome = document.getElementById('Nome').value.trim();
+        const email = emailInput.value.trim();
+        const senha = senhaInput.value;
+        const confirmarSenha = confirmarSenhaInput.value;
+        
+        let isValid = true;
+        
+        // Validações
+        if (!nome) {
+            document.getElementById('Nome').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('Nome').classList.remove('is-invalid');
+        }
+        
+        if (!email || !/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) {
+            emailInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            emailInput.classList.remove('is-invalid');
+        }
+        
+        // Se a senha foi preenchida, validar
+        if (senha.length > 0) {
+            if (senha.length < 6) {
+                senhaInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                senhaInput.classList.remove('is-invalid');
+            }
+            
+            if (senha !== confirmarSenha) {
+                confirmarSenhaInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                confirmarSenhaInput.classList.remove('is-invalid');
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            showMessage('error', 'Por favor, corrija os erros no formulário.', 5000);
+            return;
+        }
+        
+        // Mostrar loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Salvando...';
+    });
+});
+
+// Função para mostrar mensagens
+function showMessage(type, message, duration = 5000) {
+    // Remover mensagens existentes
+    const existingMessages = document.querySelectorAll('.message-container');
+    existingMessages.forEach(msg => msg.remove());
+
+    // Criar nova mensagem
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-container message-${type}`;
+    messageDiv.innerHTML = `
+        <div class="message-content">
+            <div class="message-icon">
+                <i class="bi ${getMessageIcon(type)}"></i>
+            </div>
+            <div class="message-text">${message}</div>
+            <button class="message-close" onclick="this.parentElement.parentElement.remove()">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    `;
+
+    // Adicionar ao body
+    document.body.appendChild(messageDiv);
+
+    // Mostrar com animação
+    setTimeout(() => {
+        messageDiv.classList.add('message-show');
+    }, 100);
+
+    // Remover automaticamente
+    if (duration > 0) {
+        setTimeout(() => {
+            messageDiv.classList.remove('message-show');
+            messageDiv.classList.add('message-hide');
+            setTimeout(() => {
+                if (messageDiv.parentElement) {
+                    messageDiv.remove();
+                }
+            }, 300);
+        }, duration);
+    }
+}
+
+function getMessageIcon(type) {
+    switch (type) {
+        case 'success': return 'bi-check-circle';
+        case 'error': return 'bi-exclamation-circle';
+        case 'warning': return 'bi-exclamation-triangle';
+        case 'info': return 'bi-info-circle';
+        default: return 'bi-info-circle';
+    }
+}
+</script>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control[readonly] {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.input-group .btn {
+    border-color: #ced4da;
+}
+
+.input-group .btn:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.form-text {
+    font-size: 0.875em;
+    color: #6c757d;
+}
+</style> 
