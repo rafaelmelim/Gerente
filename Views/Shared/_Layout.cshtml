@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DorowCamp</title>
+    <title>@ViewData["Title"] - @(ViewBag.CabecalhoSistema ?? "DorowCamp")</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/messages.css" asp-append-version="true" />
@@ -18,7 +18,7 @@
             <div class="sidebar-header p-3 border-bottom border-secondary">
                 <h4 class="mb-0">
                     <i class="bi bi-gear-fill me-2"></i>
-                    DorowCamp
+                    @(ViewBag.CabecalhoSistema ?? "DorowCamp")
                 </h4>
             </div>
             
@@ -36,40 +36,76 @@
                             <span class="sidebar-text">Projetos</span>
                         </a>
                     </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white-50 sidebar-link" href="#" data-bs-toggle="tooltip" title="Usuários">
-                            <i class="bi bi-people-fill me-2"></i>
-                            <span class="sidebar-text">Usuários</span>
-                        </a>
-                    </li>
+                    @if (Context.Session.GetInt32("UserId").HasValue)
+                    {
+                        var accessControlService = Context.RequestServices.GetService<Gerente.Services.AccessControlService>();
+                        var userId = Context.Session.GetInt32("UserId").GetValueOrDefault();
+                        
+                        @if (accessControlService?.HasAccessToUsers(userId.ToString()) == true)
+                        {
+                            <li class="nav-item mb-2">
+                                <a class="nav-link text-white-50 sidebar-link" href="@Url.Action("Index", "Usuario")" data-bs-toggle="tooltip" title="Usuários">
+                                    <i class="bi bi-people-fill me-2"></i>
+                                    <span class="sidebar-text">Usuários</span>
+                                </a>
+                            </li>
+                        }
+                    }
                     <li class="nav-item mb-2">
                         <a class="nav-link text-white-50 sidebar-link" href="#" data-bs-toggle="tooltip" title="Relatórios">
                             <i class="bi bi-graph-up me-2"></i>
                             <span class="sidebar-text">Relatórios</span>
                         </a>
                     </li>
-                    <li class="nav-item mb-2">
-                        <div class="dropdown">
-                            <a class="nav-link text-white-50 sidebar-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-gear-fill me-2"></i>
-                                <span class="sidebar-text">Configurações</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-dark">
-                                <li>
-                                    <a class="dropdown-item" href="@Url.Action("Index", "ConfiguracaoEmail")">
-                                        <i class="bi bi-envelope-fill me-2"></i>
-                                        E-mail
+                    @if (Context.Session.GetInt32("UserId").HasValue)
+                    {
+                        var accessControlService = Context.RequestServices.GetService<Gerente.Services.AccessControlService>();
+                        var userId = Context.Session.GetInt32("UserId").GetValueOrDefault();
+                        
+                        @if (accessControlService?.HasAccessToConfigurations(userId) == true)
+                        {
+                            <li class="nav-item mb-2">
+                                <div class="dropdown">
+                                    <a class="nav-link text-white-50 sidebar-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-gear-fill me-2"></i>
+                                        <span class="sidebar-text">Configurações</span>
                                     </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="@Url.Action("Index", "Usuario")">
-                                        <i class="bi bi-people-fill me-2"></i>
-                                        Cadastro de Usuários
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
+                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                        @if (accessControlService?.HasAccessToUsers(userId) == true)
+                                        {
+                                            <li>
+                                                <a class="dropdown-item" href="@Url.Action("Index", "Usuario")">
+                                                    <i class="bi bi-people-fill me-2"></i>
+                                                    Cadastro de Usuários
+                                                </a>
+                                            </li>
+                                        }
+                                        <li>
+                                            <a class="dropdown-item" href="@Url.Action("Index", "PerfilAcesso")">
+                                                <i class="bi bi-shield-lock me-2"></i>
+                                                Perfis de Acesso
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="@Url.Action("Index", "ConfiguracaoEmail")">
+                                                <i class="bi bi-envelope-fill me-2"></i>
+                                                E-mail
+                                            </a>
+                                        </li>
+                                        @if (accessControlService?.HasAccessToSystemParameters(userId) == true)
+                                        {
+                                            <li>
+                                                <a class="dropdown-item" href="@Url.Action("Index", "ParametroSistema")">
+                                                    <i class="bi bi-gear-wide-connected me-2"></i>
+                                                    Parâmetro do Sistema
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </li>
+                        }
+                    }
                 </ul>
             </div>
             
@@ -102,7 +138,16 @@
             
             <footer class="border-top footer text-muted mt-4">
                 <div class="container-fluid">
-                    Sistema DorowCamp 2025©
+                    <div class="row align-items-center">
+                        <div class="col-md-6 col-12">
+                            @(ViewBag.NomeRodape ?? "Sistema DorowCamp 2025©")
+                        </div>
+                        <div class="col-md-6 col-12 text-md-end text-center">
+                            <small class="text-muted">
+                                Versão @(ViewBag.VersaoSistema ?? "1.0.0")
+                            </small>
+                        </div>
+                    </div>
                 </div>
             </footer>
         </div>
@@ -154,6 +199,31 @@
                 !sidebar.contains(event.target) && 
                 !sidebarToggle.contains(event.target)) {
                 sidebar.classList.remove('show');
+            }
+        });
+        
+        // Melhorar experiência mobile
+        function handleResize() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('show');
+                mainContent.style.marginLeft = '250px';
+            } else {
+                mainContent.style.marginLeft = '0';
+            }
+        }
+        
+        // Executar no carregamento e no redimensionamento
+        window.addEventListener('resize', handleResize);
+        handleResize();
+        
+        // Melhorar acessibilidade do sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('sidebar').classList.toggle('show');
             }
         });
         

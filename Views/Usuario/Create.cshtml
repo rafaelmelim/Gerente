@@ -85,6 +85,23 @@
                         </div>
 
                         <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="PerfilAcessoId" class="form-label">
+                                    <i class="bi bi-shield-lock me-1"></i>
+                                    Perfil de Acesso
+                                </label>
+                                <select asp-for="PerfilAcessoId" class="form-select" asp-items="@(new SelectList(ViewBag.PerfisAcesso ?? new List<Gerente.Models.PerfilAcesso>(), "Id", "Nome"))">
+                                    <option value="">Selecione um perfil de acesso</option>
+                                </select>
+                                <span asp-validation-for="PerfilAcessoId" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    O perfil define as permissões de acesso do usuário no sistema
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-12">
                                 <div class="d-flex justify-content-end gap-2">
                                     <a href="@Url.Action("Index", "Usuario")" class="btn btn-outline-secondary">

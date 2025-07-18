@@ -87,6 +87,30 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
+                                <label asp-for="PerfilAcessoId" class="form-label">
+                                    <i class="bi bi-shield-lock me-1"></i>
+                                    Perfil de Acesso
+                                </label>
+                                <select asp-for="PerfilAcessoId" class="form-select" asp-items="@(new SelectList(ViewBag.PerfisAcesso ?? new List<Gerente.Models.PerfilAcesso>(), "Id", "Nome"))">
+                                    <option value="">Selecione um perfil de acesso</option>
+                                </select>
+                                <span asp-validation-for="PerfilAcessoId" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    O perfil define as permissões de acesso do usuário no sistema
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    Última Alteração
+                                </label>
+                                <input type="text" class="form-control" value="@Model.DataAlteracao.ToString("dd/MM/yyyy HH:mm")" readonly />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">
                                     <i class="bi bi-calendar-plus me-1"></i>
                                     Data de Criação
@@ -95,10 +119,10 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">
-                                    <i class="bi bi-calendar-check me-1"></i>
-                                    Última Alteração
+                                    <i class="bi bi-shield me-1"></i>
+                                    Perfil Atual
                                 </label>
-                                <input type="text" class="form-control" value="@Model.DataAlteracao.ToString("dd/MM/yyyy HH:mm")" readonly />
+                                <input type="text" class="form-control" value="@(Model.PerfilAcessoNome ?? "Sem perfil definido")" readonly />
                             </div>
                         </div>
 

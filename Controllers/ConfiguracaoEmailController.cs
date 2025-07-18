@@ -6,13 +6,10 @@ using Gerente.Models;
 
 namespace Gerente.Controllers
 {
-    public class ConfiguracaoEmailController : Controller
+    public class ConfiguracaoEmailController : BaseController
     {
-        private readonly IConfiguration _configuration;
-
-        public ConfiguracaoEmailController(IConfiguration configuration)
+        public ConfiguracaoEmailController(IConfiguration configuration) : base(configuration)
         {
-            _configuration = configuration;
         }
 
         public IActionResult Index()

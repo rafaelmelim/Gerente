@@ -1,0 +1,220 @@
+@model Gerente.Models.PerfilAcessoViewModel
+
+@{
+    ViewData["Title"] = "Editar Perfil de Acesso";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-shield-lock me-2"></i>
+            Editar Perfil de Acesso
+        </h2>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>
+            Voltar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Nome" class="form-label"></label>
+                                    <input asp-for="Nome" class="form-control" />
+                                    <span asp-validation-for="Nome" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Ativo" class="form-label"></label>
+                                    <div class="form-check form-switch">
+                                        <input asp-for="Ativo" class="form-check-input" />
+                                        <label asp-for="Ativo" class="form-check-label">Perfil ativo</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Descricao" class="form-label"></label>
+                            <textarea asp-for="Descricao" class="form-control" rows="3" placeholder="Descreva o propósito deste perfil..."></textarea>
+                            <span asp-validation-for="Descricao" class="text-danger"></span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="mb-3">
+                            <i class="bi bi-gear me-2"></i>
+                            Permissões de Acesso
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-gear-fill me-2"></i>
+                                            Configurações do Sistema
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check form-switch mb-3">
+                                            <input asp-for="AcessoTotal" class="form-check-input" id="acessoTotal" onchange="toggleAcessoTotal()" />
+                                            <label asp-for="AcessoTotal" class="form-check-label fw-bold text-success">
+                                                <i class="bi bi-shield-check me-1"></i>
+                                                Acesso Total
+                                            </label>
+                                            <div class="form-text">Concede todas as permissões do sistema</div>
+                                        </div>
+
+                                        <div id="permissoesEspecificas">
+                                            <div class="form-check form-switch mb-2">
+                                                <input asp-for="AcessoConfiguracoes" class="form-check-input" />
+                                                <label asp-for="AcessoConfiguracoes" class="form-check-label">
+                                                    <i class="bi bi-gear me-1"></i>
+                                                    Configurações
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-switch mb-2">
+                                                <input asp-for="AcessoUsuarios" class="form-check-input" />
+                                                <label asp-for="AcessoUsuarios" class="form-check-label">
+                                                    <i class="bi bi-people me-1"></i>
+                                                    Usuários
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-folder-fill me-2"></i>
+                                            Funcionalidades
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check form-switch mb-2">
+                                            <input asp-for="AcessoProjetos" class="form-check-input" />
+                                            <label asp-for="AcessoProjetos" class="form-check-label">
+                                                <i class="bi bi-folder me-1"></i>
+                                                Projetos
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input asp-for="AcessoRelatorios" class="form-check-input" />
+                                            <label asp-for="AcessoRelatorios" class="form-check-label">
+                                                <i class="bi bi-graph-up me-1"></i>
+                                                Relatórios
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Atualizar Perfil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Informações
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <strong>Acesso Total:</strong> Concede todas as permissões
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-gear text-primary me-2"></i>
+                            <strong>Configurações:</strong> Menu de configurações do sistema
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-people text-info me-2"></i>
+                            <strong>Usuários:</strong> Gerenciamento de usuários
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-folder text-warning me-2"></i>
+                            <strong>Projetos:</strong> Criação e gestão de projetos
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-graph-up text-secondary me-2"></i>
+                            <strong>Relatórios:</strong> Visualização de relatórios
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            @if (Model.Nome == "Administrador" || Model.Nome == "Usuário")
+            {
+                <div class="card border-danger mt-3">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Perfil Padrão
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0 text-muted">
+                            Este é um perfil padrão do sistema. Algumas permissões podem estar limitadas para manter a segurança.
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleAcessoTotal() {
+            const acessoTotal = document.getElementById('acessoTotal');
+            const permissoesEspecificas = document.getElementById('permissoesEspecificas');
+            const checkboxes = permissoesEspecificas.querySelectorAll('input[type="checkbox"]');
+            
+            if (acessoTotal.checked) {
+                permissoesEspecificas.style.opacity = '0.5';
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                    cb.disabled = true;
+                });
+            } else {
+                permissoesEspecificas.style.opacity = '1';
+                checkboxes.forEach(cb => {
+                    cb.disabled = false;
+                });
+            }
+        }
+
+        // Inicializar estado
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleAcessoTotal();
+        });
+    </script>
+} 

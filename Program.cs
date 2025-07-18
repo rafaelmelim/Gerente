@@ -36,6 +36,9 @@ builder.Services.AddSession(options =>
 // Registrar o serviço de redefinição de senha
 builder.Services.AddScoped<PasswordResetService>();
 
+// Registrar o serviço de controle de acesso
+builder.Services.AddScoped<AccessControlService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

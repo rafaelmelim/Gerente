@@ -8,14 +8,12 @@ using Gerente.Models;
 
 namespace Gerente.Controllers
 {
-    public class LoginController : Controller
+    public class LoginController : BaseController
     {
-        private readonly IConfiguration _configuration;
         private readonly PasswordResetService _passwordResetService;
 
-        public LoginController(IConfiguration configuration, PasswordResetService passwordResetService)
+        public LoginController(IConfiguration configuration, PasswordResetService passwordResetService) : base(configuration)
         {
-            _configuration = configuration;
             _passwordResetService = passwordResetService;
         }
 
@@ -57,10 +55,10 @@ namespace Gerente.Controllers
                     {
                         if (reader.Read())
                         {
-                            var userId = reader.GetInt32("id");
-                            var userEmail = reader.GetString("email");
-                            var userName = reader.IsDBNull("nome") ? "" : reader.GetString("nome");
-                            var storedPassword = reader.GetString("senha");
+                            var userId = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
+                            var userEmail = reader.GetString(1);
+                            var userName = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                            var storedPassword = reader.GetString(3);
                             
                             // Verificar se a senha está em hash ou texto plano (para compatibilidade)
                             var hashedPassword = HashPassword(password);
@@ -76,14 +74,25 @@ namespace Gerente.Controllers
                             {
                                 passwordValid = true;
                                 // Atualizar para hash na próxima vez
-                                UpdatePasswordToHash(conn, userId, hashedPassword);
+                                if (userId > 0)
+                                {
+                                    UpdatePasswordToHash(conn, userId, hashedPassword);
+                                }
                             }
                             
                             if (passwordValid)
                             {
+                                // Obter informações do perfil de acesso
+                                PerfilAcesso? perfilAcesso = null;
+                                if (userId > 0)
+                                {
+                                    perfilAcesso = ObterPerfilAcessoUsuario(userId);
+                                }
+                                
                                 HttpContext.Session.SetInt32("UserId", userId);
                                 HttpContext.Session.SetString("Username", userEmail);
                                 HttpContext.Session.SetString("UserName", userName);
+                                HttpContext.Session.SetString("UserProfile", perfilAcesso?.Nome ?? "Sem perfil");
                                 
                                 if (isAjax)
                                 {
@@ -107,6 +116,11 @@ namespace Gerente.Controllers
 
         private void UpdatePasswordToHash(NpgsqlConnection conn, int userId, string hashedPassword)
         {
+            if (userId <= 0 || string.IsNullOrEmpty(hashedPassword))
+            {
+                return;
+            }
+            
             try
             {
                 using (var cmd = new NpgsqlCommand("UPDATE usuarios SET senha = @senha WHERE id = @userId", conn))
@@ -129,10 +143,17 @@ namespace Gerente.Controllers
                 return string.Empty;
             }
             
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            try
             {
-                var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return System.Convert.ToBase64String(hashedBytes);
+                using (var sha256 = System.Security.Cryptography.SHA256.Create())
+                {
+                    var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                    return System.Convert.ToBase64String(hashedBytes);
+                }
+            }
+            catch
+            {
+                return string.Empty;
             }
         }
 
@@ -176,6 +197,11 @@ namespace Gerente.Controllers
 
         private bool EmailExisteNoCadastro(string email)
         {
+            if (string.IsNullOrEmpty(email))
+            {
+                return false;
+            }
+            
             string? connString = _configuration.GetConnectionString("DefaultConnection");
             
             if (string.IsNullOrEmpty(connString))
@@ -193,6 +219,56 @@ namespace Gerente.Controllers
                     return count > 0;
                 }
             }
+        }
+
+        private PerfilAcesso? ObterPerfilAcessoUsuario(int userId)
+        {
+            if (userId <= 0)
+            {
+                return null;
+            }
+            
+            string? connString = _configuration.GetConnectionString("DefaultConnection");
+            
+            if (string.IsNullOrEmpty(connString))
+            {
+                return null;
+            }
+
+            using (var conn = new NpgsqlConnection(connString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(
+                    @"SELECT pa.id, pa.nome, pa.descricao, pa.acesso_configuracoes, 
+                             pa.acesso_usuarios, pa.acesso_projetos, pa.acesso_relatorios, 
+                             pa.acesso_total, pa.ativo
+                      FROM usuarios u 
+                      LEFT JOIN perfis_acesso pa ON u.perfil_acesso_id = pa.id 
+                      WHERE u.id = @userId", conn))
+                {
+                    cmd.Parameters.AddWithValue("@userId", userId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new PerfilAcesso
+                            {
+                                Id = reader.IsDBNull(0) ? 0 : reader.GetInt32(0),
+                                Nome = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                                Descricao = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                AcessoConfiguracoes = reader.IsDBNull(3) ? false : reader.GetBoolean(3),
+                                AcessoUsuarios = reader.IsDBNull(4) ? false : reader.GetBoolean(4),
+                                AcessoProjetos = reader.IsDBNull(5) ? false : reader.GetBoolean(5),
+                                AcessoRelatorios = reader.IsDBNull(6) ? false : reader.GetBoolean(6),
+                                AcessoTotal = reader.IsDBNull(7) ? false : reader.GetBoolean(7),
+                                Ativo = reader.IsDBNull(8) ? false : reader.GetBoolean(8)
+                            };
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         [HttpGet]

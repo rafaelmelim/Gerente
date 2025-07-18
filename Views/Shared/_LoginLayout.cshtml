@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DorowCamp</title>
+    <title>@ViewData["Title"] - @(ViewBag.CabecalhoSistema ?? "DorowCamp")</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/messages.css" asp-append-version="true" />
@@ -22,7 +22,16 @@
     
     <footer class="login-footer">
         <div class="container">
-            <p>Sistema DorowCamp 2025©</p>
+            <div class="row align-items-center">
+                <div class="col-md-6 col-12">
+                    <p>@(ViewBag.NomeRodape ?? "Sistema DorowCamp 2025©")</p>
+                </div>
+                <div class="col-md-6 col-12 text-md-end text-center">
+                    <small class="text-muted">
+                        Versão @(ViewBag.VersaoSistema ?? "1.0.0")
+                    </small>
+                </div>
+            </div>
         </div>
     </footer>
 

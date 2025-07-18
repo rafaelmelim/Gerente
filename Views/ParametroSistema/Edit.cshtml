@@ -1,0 +1,255 @@
+@model Gerente.Models.ParametroSistema
+
+@{
+    ViewData["Title"] = "Editar Parâmetros do Sistema";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-gear-wide-connected me-2"></i>
+                Editar Parâmetros do Sistema
+            </h1>
+            <p class="text-muted mb-0">Configure os parâmetros gerais do sistema</p>
+        </div>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>
+            Voltar
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" id="parametrosForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="CabecalhoSistema" class="form-label">
+                                    <i class="bi bi-type-h1 me-1"></i>
+                                    @Html.DisplayNameFor(m => m.CabecalhoSistema)
+                                </label>
+                                <input asp-for="CabecalhoSistema" class="form-control" placeholder="Digite o cabeçalho do sistema" />
+                                <span asp-validation-for="CabecalhoSistema" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Este cabeçalho será exibido na tela de login e em todos os cabeçalhos do sistema
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="VersaoSistema" class="form-label">
+                                    <i class="bi bi-tag me-1"></i>
+                                    @Html.DisplayNameFor(m => m.VersaoSistema)
+                                </label>
+                                <input asp-for="VersaoSistema" class="form-control" placeholder="Ex: 1.0.0" />
+                                <span asp-validation-for="VersaoSistema" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    A versão será exibida no rodapé da tela inicial
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NomeRodape" class="form-label">
+                                    <i class="bi bi-type me-1"></i>
+                                    @Html.DisplayNameFor(m => m.NomeRodape)
+                                </label>
+                                <input asp-for="NomeRodape" class="form-control" placeholder="Digite o nome do rodapé" />
+                                <span asp-validation-for="NomeRodape" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Substituirá o rodapé padrão em todo o sistema
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (Model.Id > 0)
+                        {
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar-plus me-1"></i>
+                                        Data de Criação
+                                    </label>
+                                    <input type="text" class="form-control" value="@Model.DataCriacao.ToString("dd/MM/yyyy HH:mm")" readonly />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        Última Alteração
+                                    </label>
+                                    <input type="text" class="form-control" value="@Model.DataAlteracao.ToString("dd/MM/yyyy HH:mm")" readonly />
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle me-2"></i>
+                                        Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Salvar Parâmetros
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('parametrosForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Validação em tempo real
+    const cabecalhoInput = document.getElementById('CabecalhoSistema');
+    const versaoInput = document.getElementById('VersaoSistema');
+    const rodapeInput = document.getElementById('NomeRodape');
+
+    function validarCampo(input, minLength = 1) {
+        const value = input.value.trim();
+        if (value.length >= minLength) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        }
+    }
+
+    cabecalhoInput.addEventListener('input', () => validarCampo(cabecalhoInput, 1));
+    versaoInput.addEventListener('input', () => validarCampo(versaoInput, 1));
+    rodapeInput.addEventListener('input', () => validarCampo(rodapeInput, 1));
+
+    // Submit do formulário
+    form.addEventListener('submit', function(e) {
+        const cabecalho = cabecalhoInput.value.trim();
+        const versao = versaoInput.value.trim();
+        const rodape = rodapeInput.value.trim();
+        
+        let isValid = true;
+        
+        // Validações
+        if (!cabecalho) {
+            cabecalhoInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            cabecalhoInput.classList.remove('is-invalid');
+        }
+        
+        if (!versao) {
+            versaoInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            versaoInput.classList.remove('is-invalid');
+        }
+        
+        if (!rodape) {
+            rodapeInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            rodapeInput.classList.remove('is-invalid');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            showMessage('error', 'Por favor, preencha todos os campos obrigatórios.', 5000);
+            return;
+        }
+        
+        // Mostrar loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Salvando...';
+    });
+});
+
+// Função para mostrar mensagens
+function showMessage(type, message, duration = 5000) {
+    // Remover mensagens existentes
+    const existingMessages = document.querySelectorAll('.message-container');
+    existingMessages.forEach(msg => msg.remove());
+
+    // Criar nova mensagem
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-container message-${type}`;
+    messageDiv.innerHTML = `
+        <div class="message-content">
+            <div class="message-icon">
+                <i class="bi ${getMessageIcon(type)}"></i>
+            </div>
+            <div class="message-text">${message}</div>
+            <button class="message-close" onclick="this.parentElement.parentElement.remove()">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    `;
+
+    // Adicionar ao body
+    document.body.appendChild(messageDiv);
+
+    // Mostrar com animação
+    setTimeout(() => {
+        messageDiv.classList.add('message-show');
+    }, 100);
+
+    // Remover automaticamente
+    if (duration > 0) {
+        setTimeout(() => {
+            messageDiv.classList.remove('message-show');
+            messageDiv.classList.add('message-hide');
+            setTimeout(() => {
+                if (messageDiv.parentElement) {
+                    messageDiv.remove();
+                }
+            }, 300);
+        }, duration);
+    }
+}
+
+function getMessageIcon(type) {
+    switch (type) {
+        case 'success': return 'bi-check-circle';
+        case 'error': return 'bi-exclamation-circle';
+        case 'warning': return 'bi-exclamation-triangle';
+        case 'info': return 'bi-info-circle';
+        default: return 'bi-info-circle';
+    }
+}
+</script>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-text {
+    font-size: 0.875em;
+    color: #6c757d;
+}
+</style> 

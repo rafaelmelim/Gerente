@@ -27,6 +27,12 @@ namespace Gerente.Models
         
         [Display(Name = "Data de Alteração")]
         public DateTime DataAlteracao { get; set; }
+        
+        [Display(Name = "Perfil de Acesso")]
+        public int? PerfilAcessoId { get; set; }
+        
+        [Display(Name = "Perfil de Acesso")]
+        public string? PerfilAcessoNome { get; set; }
     }
 
     public class UsuarioViewModel
@@ -61,5 +67,11 @@ namespace Gerente.Models
         
         [Display(Name = "Data de Alteração")]
         public DateTime DataAlteracao { get; set; }
+        
+        [Display(Name = "Perfil de Acesso")]
+        public int? PerfilAcessoId { get; set; }
+        
+        [Display(Name = "Perfil de Acesso")]
+        public string? PerfilAcessoNome { get; set; }
     }
 } 

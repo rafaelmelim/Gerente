@@ -1,0 +1,308 @@
+@model IEnumerable<Gerente.Models.PerfilAcesso>
+
+@{
+    ViewData["Title"] = "Perfis de Acesso";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-shield-lock me-2"></i>
+            Perfis de Acesso
+        </h2>
+        <a href="@Url.Action("Create")" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>
+            Novo Perfil
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-4">
+                    <i class="bi bi-shield-lock text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-3">Nenhum perfil de acesso cadastrado.</p>
+                    <a href="@Url.Action("Create")" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Criar Primeiro Perfil
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>Descrição</th>
+                                <th>Permissões</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var perfil in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@perfil.Nome</strong>
+                                        @if (perfil.AcessoTotal)
+                                        {
+                                            <span class="badge bg-danger ms-2">Admin</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(perfil.Descricao))
+                                        {
+                                            <span class="text-muted">@perfil.Descricao</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Sem descrição</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @if (perfil.AcessoTotal)
+                                            {
+                                                <span class="badge bg-success">Acesso Total</span>
+                                            }
+                                            else
+                                            {
+                                                @if (perfil.AcessoConfiguracoes)
+                                                {
+                                                    <span class="badge bg-primary">Configurações</span>
+                                                }
+                                                @if (perfil.AcessoUsuarios)
+                                                {
+                                                    <span class="badge bg-info">Usuários</span>
+                                                }
+                                                @if (perfil.AcessoProjetos)
+                                                {
+                                                    <span class="badge bg-warning">Projetos</span>
+                                                }
+                                                @if (perfil.AcessoRelatorios)
+                                                {
+                                                    <span class="badge bg-secondary">Relatórios</span>
+                                                }
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (perfil.Ativo)
+                                        {
+                                            <span class="badge bg-success">Ativo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inativo</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Edit", new { id = perfil.Id })" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            @if (perfil.Nome != "Administrador" && perfil.Nome != "Usuário")
+                                            {
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-danger" 
+                                                        onclick="excluirPerfil(@perfil.Id, '@perfil.Nome')"
+                                                        title="Excluir">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="mb-0" style="font-size:1.1em;">
+                    Tem certeza que deseja excluir o perfil <strong id="perfilNome"></strong>?
+                </p>
+                <p class="text-muted mt-2 mb-0">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="bi bi-trash me-2"></i>
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Token antiforgery -->
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        let perfilIdParaExcluir = null;
+
+        function excluirPerfil(id, nome) {
+            perfilIdParaExcluir = id;
+            document.getElementById('perfilNome').textContent = nome;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+            if (!perfilIdParaExcluir) return;
+            
+            try {
+                // Obter o token CSRF
+                const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (!tokenInput) {
+                    showMessage('error', 'Token de segurança não encontrado. Recarregue a página e tente novamente.', 8000);
+                    return;
+                }
+                
+                const token = tokenInput.value;
+                if (!token) {
+                    showMessage('error', 'Token de segurança inválido. Recarregue a página e tente novamente.', 8000);
+                    return;
+                }
+                
+                const response = await fetch(`/PerfilAcesso/Delete/${perfilIdParaExcluir}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Fechar modal
+                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                    
+                    // Mostrar mensagem de sucesso
+                    showMessage('success', result.message, 5000);
+                    
+                    // Recarregar página após 1 segundo
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showMessage('error', result.message, 8000);
+                }
+            } catch (error) {
+                console.error('Erro na exclusão:', error);
+                showMessage('error', 'Erro ao excluir perfil. Tente novamente.', 5000);
+            }
+        });
+
+        // Função para mostrar mensagens
+        function showMessage(type, message, duration = 5000) {
+            // Remover mensagens existentes
+            const existingMessages = document.querySelectorAll('.message-container');
+            existingMessages.forEach(msg => msg.remove());
+
+            // Criar nova mensagem
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message-container message-${type}`;
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="message-icon">
+                        <i class="bi ${getMessageIcon(type)}"></i>
+                    </div>
+                    <div class="message-text">${message}</div>
+                    <button class="message-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            `;
+
+            // Adicionar ao body
+            document.body.appendChild(messageDiv);
+
+            // Mostrar com animação
+            setTimeout(() => {
+                messageDiv.classList.add('message-show');
+            }, 100);
+
+            // Remover automaticamente
+            if (duration > 0) {
+                setTimeout(() => {
+                    messageDiv.classList.remove('message-show');
+                    messageDiv.classList.add('message-hide');
+                    setTimeout(() => {
+                        if (messageDiv.parentElement) {
+                            messageDiv.remove();
+                        }
+                    }, 300);
+                }, duration);
+            }
+        }
+
+        function getMessageIcon(type) {
+            switch (type) {
+                case 'success': return 'bi-check-circle';
+                case 'error': return 'bi-exclamation-circle';
+                case 'warning': return 'bi-exclamation-triangle';
+                case 'info': return 'bi-info-circle';
+                default: return 'bi-info-circle';
+            }
+        }
+    </script>
+}
+
+<style>
+.table th {
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.btn-group .btn {
+    border-radius: 0.375rem !important;
+}
+
+.btn-group .btn:first-child {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.btn-group .btn:last-child {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+}
+</style> 

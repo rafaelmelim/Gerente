@@ -154,6 +154,7 @@ body {
   .sidebar {
     transform: translateX(-100%);
     width: 280px;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
   }
   
   .sidebar.show {
@@ -162,14 +163,55 @@ body {
   
   .main-content {
     margin-left: 0;
+    width: 100%;
   }
   
   .sidebar-toggle {
     display: block;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #2c3e50;
+    border: none;
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar-toggle:hover {
+    background: #34495e;
+    transform: translateY(-1px);
   }
   
   .sidebar-text {
     display: block;
+  }
+  
+  /* Melhorar espaçamento do conteúdo em mobile */
+  .content-wrapper {
+    padding: 15px;
+    margin-top: 60px; /* Espaço para o botão toggle */
+  }
+  
+  /* Ajustar footer em mobile */
+  .footer {
+    padding: 15px 0;
+  }
+  
+  .footer .row {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .footer .col-md-6 {
+    width: 100%;
+  }
+  
+  .footer .text-end {
+    text-align: center !important;
   }
 }
 
@@ -180,6 +222,59 @@ body {
   
   .sidebar-text {
     display: block;
+  }
+  
+  /* Melhorar espaçamento em tablets */
+  .content-wrapper {
+    padding: 25px;
+  }
+}
+
+/* Ajustes para telas médias (tablets) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar {
+    width: 220px;
+  }
+  
+  .main-content {
+    margin-left: 220px;
+  }
+  
+  .content-wrapper {
+    padding: 20px;
+  }
+}
+
+/* Ajustes para telas muito pequenas */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .content-wrapper {
+    padding: 10px;
+    margin-top: 70px;
+  }
+  
+  .sidebar-toggle {
+    top: 10px;
+    left: 10px;
+    padding: 8px 10px;
+  }
+  
+  /* Melhorar legibilidade em mobile */
+  .sidebar-header h4 {
+    font-size: 1.1rem;
+  }
+  
+  .sidebar-link {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  .sidebar-link i {
+    font-size: 1rem;
   }
 }
 
@@ -198,8 +293,54 @@ body {
 .footer {
   background-color: #f8f9fa;
   border-top: 1px solid #dee2e6;
-  padding: 15px 0;
-  margin-top: auto;
+  padding: 20px 0;
+}
+
+/* Melhorar responsividade geral */
+@media (max-width: 576px) {
+  /* Ajustes para telas extra pequenas */
+  .container-fluid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  /* Melhorar espaçamento de cards */
+  .card {
+    margin-bottom: 15px;
+  }
+  
+  .card-body {
+    padding: 15px;
+  }
+  
+  /* Ajustar botões em mobile */
+  .btn {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Melhorar formulários em mobile */
+  .form-control {
+    font-size: 16px; /* Evita zoom no iOS */
+  }
+  
+  /* Ajustar tabelas em mobile */
+  .table-responsive {
+    font-size: 14px;
+  }
+  
+  /* Melhorar modais em mobile */
+  .modal-dialog {
+    margin: 10px;
+  }
+  
+  .modal-body {
+    padding: 15px;
+  }
+  
+  .modal-footer {
+    padding: 10px 15px;
+  }
 }
 
 /* Card improvements */

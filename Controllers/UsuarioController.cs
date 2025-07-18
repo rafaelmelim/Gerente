@@ -4,16 +4,15 @@ using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Gerente.Models;
 using System.Collections.Generic; // Added missing import
+using Gerente.Filters;
 
 namespace Gerente.Controllers
 {
-    public class UsuarioController : Controller
+    [RequireUsersAccess]
+    public class UsuarioController : BaseController
     {
-        private readonly IConfiguration _configuration;
-
-        public UsuarioController(IConfiguration configuration)
+        public UsuarioController(IConfiguration configuration) : base(configuration)
         {
-            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -25,7 +24,9 @@ namespace Gerente.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View(new UsuarioViewModel());
+            var viewModel = new UsuarioViewModel();
+            ViewBag.PerfisAcesso = ObterPerfisAcesso();
+            return View(viewModel);
         }
 
         [HttpPost]
@@ -40,6 +41,7 @@ namespace Gerente.Controllers
                     if (EmailExiste(usuarioViewModel.Email))
                     {
                         ModelState.AddModelError("Email", "Este e-mail já está cadastrado no sistema.");
+                        ViewBag.PerfisAcesso = ObterPerfisAcesso();
                         return View(usuarioViewModel);
                     }
 
@@ -58,6 +60,8 @@ namespace Gerente.Controllers
                 }
             }
 
+            // Garantir que ViewBag.PerfisAcesso esteja sempre definido
+            ViewBag.PerfisAcesso = ObterPerfisAcesso();
             return View(usuarioViewModel);
         }
 
@@ -76,10 +80,13 @@ namespace Gerente.Controllers
                 Id = usuario.Id,
                 Nome = usuario.Nome,
                 Email = usuario.Email,
+                PerfilAcessoId = usuario.PerfilAcessoId,
+                PerfilAcessoNome = usuario.PerfilAcessoNome,
                 DataCriacao = usuario.DataCriacao,
                 DataAlteracao = usuario.DataAlteracao
             };
 
+            ViewBag.PerfisAcesso = ObterPerfisAcesso();
             return View(usuarioViewModel);
         }
 
@@ -95,6 +102,7 @@ namespace Gerente.Controllers
                     if (EmailExiste(usuarioViewModel.Email, usuarioViewModel.Id))
                     {
                         ModelState.AddModelError("Email", "Este e-mail já está cadastrado no sistema.");
+                        ViewBag.PerfisAcesso = ObterPerfisAcesso();
                         return View(usuarioViewModel);
                     }
 
@@ -117,6 +125,8 @@ namespace Gerente.Controllers
                 }
             }
 
+            // Garantir que ViewBag.PerfisAcesso esteja sempre definido
+            ViewBag.PerfisAcesso = ObterPerfisAcesso();
             return View(usuarioViewModel);
         }
 
@@ -163,7 +173,7 @@ namespace Gerente.Controllers
                 }
                 return Json(new { success = false, message = mensagemErro });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Json(new { success = false, message = "Erro ao excluir usuário. Tente novamente." });
             }
@@ -183,7 +193,11 @@ namespace Gerente.Controllers
             {
                 conn.Open();
                 using (var cmd = new NpgsqlCommand(
-                    "SELECT id, nome, email, data_criacao, data_alteracao FROM usuarios ORDER BY nome", conn))
+                    @"SELECT u.id, u.nome, u.email, u.data_criacao, u.data_atualizacao, 
+                             u.perfil_acesso_id, p.nome as perfil_nome 
+                      FROM usuarios u 
+                      LEFT JOIN perfis_acesso p ON u.perfil_acesso_id = p.id 
+                      ORDER BY u.nome", conn))
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -191,11 +205,13 @@ namespace Gerente.Controllers
                         {
                             usuarios.Add(new Usuario
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("id")),
-                                Nome = reader.GetString(reader.GetOrdinal("nome")),
-                                Email = reader.GetString(reader.GetOrdinal("email")),
-                                DataCriacao = reader.GetDateTime(reader.GetOrdinal("data_criacao")),
-                                DataAlteracao = reader.GetDateTime(reader.GetOrdinal("data_alteracao"))
+                                Id = reader.IsDBNull(0) ? 0 : reader.GetInt32(0),
+                                Nome = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                                Email = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                PerfilAcessoId = reader.IsDBNull(5) ? null : (int?)reader.GetInt32(5),
+                                PerfilAcessoNome = reader.IsDBNull(6) ? null : reader.GetString(6),
+                                DataCriacao = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3),
+                                DataAlteracao = reader.IsDBNull(4) ? DateTime.MinValue : reader.GetDateTime(4)
                             });
                         }
                     }
@@ -218,7 +234,11 @@ namespace Gerente.Controllers
             {
                 conn.Open();
                 using (var cmd = new NpgsqlCommand(
-                    "SELECT id, nome, email, data_criacao, data_alteracao FROM usuarios WHERE id = @id", conn))
+                    @"SELECT u.id, u.nome, u.email, u.data_criacao, u.data_atualizacao, 
+                             u.perfil_acesso_id, p.nome as perfil_nome 
+                      FROM usuarios u 
+                      LEFT JOIN perfis_acesso p ON u.perfil_acesso_id = p.id 
+                      WHERE u.id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
                     using (var reader = cmd.ExecuteReader())
@@ -227,11 +247,13 @@ namespace Gerente.Controllers
                         {
                             return new Usuario
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("id")),
-                                Nome = reader.GetString(reader.GetOrdinal("nome")),
-                                Email = reader.GetString(reader.GetOrdinal("email")),
-                                DataCriacao = reader.GetDateTime(reader.GetOrdinal("data_criacao")),
-                                DataAlteracao = reader.GetDateTime(reader.GetOrdinal("data_alteracao"))
+                                Id = reader.IsDBNull(0) ? 0 : reader.GetInt32(0),
+                                Nome = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                                Email = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                PerfilAcessoId = reader.IsDBNull(5) ? null : (int?)reader.GetInt32(5),
+                                PerfilAcessoNome = reader.IsDBNull(6) ? null : reader.GetString(6),
+                                DataCriacao = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3),
+                                DataAlteracao = reader.IsDBNull(4) ? DateTime.MinValue : reader.GetDateTime(4)
                             };
                         }
                     }
@@ -286,11 +308,12 @@ namespace Gerente.Controllers
             {
                 conn.Open();
                 using (var cmd = new NpgsqlCommand(
-                    "INSERT INTO usuarios (nome, email, senha, data_criacao, data_alteracao) VALUES (@nome, @email, @senha, @dataCriacao, @dataAlteracao)", conn))
+                    "INSERT INTO usuarios (nome, email, senha, perfil_acesso_id, data_criacao, data_atualizacao) VALUES (@nome, @email, @senha, @perfilAcessoId, @dataCriacao, @dataAlteracao)", conn))
                 {
                     cmd.Parameters.AddWithValue("@nome", usuarioViewModel.Nome);
                     cmd.Parameters.AddWithValue("@email", usuarioViewModel.Email);
                     cmd.Parameters.AddWithValue("@senha", senhaHash);
+                    cmd.Parameters.AddWithValue("@perfilAcessoId", usuarioViewModel.PerfilAcessoId ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@dataCriacao", DateTime.Now);
                     cmd.Parameters.AddWithValue("@dataAlteracao", DateTime.Now);
                     cmd.ExecuteNonQuery();
@@ -311,7 +334,7 @@ namespace Gerente.Controllers
             {
                 conn.Open();
                 
-                string sql = "UPDATE usuarios SET nome = @nome, email = @email, data_alteracao = @dataAlteracao";
+                string sql = "UPDATE usuarios SET nome = @nome, email = @email, perfil_acesso_id = @perfilAcessoId, data_atualizacao = @dataAlteracao";
                 if (!string.IsNullOrEmpty(senhaHash))
                 {
                     sql += ", senha = @senha";
@@ -323,6 +346,7 @@ namespace Gerente.Controllers
                     cmd.Parameters.AddWithValue("@id", usuarioViewModel.Id);
                     cmd.Parameters.AddWithValue("@nome", usuarioViewModel.Nome);
                     cmd.Parameters.AddWithValue("@email", usuarioViewModel.Email);
+                    cmd.Parameters.AddWithValue("@perfilAcessoId", usuarioViewModel.PerfilAcessoId ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@dataAlteracao", DateTime.Now);
                     
                     if (!string.IsNullOrEmpty(senhaHash))
@@ -360,8 +384,55 @@ namespace Gerente.Controllers
             }
         }
 
+        private List<PerfilAcesso> ObterPerfisAcesso()
+        {
+            var perfis = new List<PerfilAcesso>();
+            string? connString = _configuration.GetConnectionString("DefaultConnection");
+            
+            if (string.IsNullOrEmpty(connString))
+            {
+                // Retornar lista vazia em vez de lançar exceção
+                return perfis;
+            }
+
+            try
+            {
+                using (var conn = new NpgsqlConnection(connString))
+                {
+                    conn.Open();
+                    using (var cmd = new NpgsqlCommand(
+                        "SELECT id, nome FROM perfis_acesso WHERE ativo = true ORDER BY nome", conn))
+                    {
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                perfis.Add(new PerfilAcesso
+                                {
+                                    Id = reader.IsDBNull(0) ? 0 : reader.GetInt32(0),
+                                    Nome = reader.IsDBNull(1) ? "" : reader.GetString(1)
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Em caso de erro, retornar lista vazia em vez de propagar a exceção
+                return new List<PerfilAcesso>();
+            }
+
+            return perfis;
+        }
+
         private string HashPassword(string password)
         {
+            if (string.IsNullOrEmpty(password))
+            {
+                return string.Empty;
+            }
+            
             using (var sha256 = System.Security.Cryptography.SHA256.Create())
             {
                 var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));

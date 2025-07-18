@@ -1,0 +1,145 @@
+@model Gerente.Models.ParametroSistema?
+
+@{
+    ViewData["Title"] = "Parâmetros do Sistema";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-gear-wide-connected me-2"></i>
+                Parâmetros do Sistema
+            </h1>
+            <p class="text-muted mb-0">Configure os parâmetros gerais do sistema</p>
+        </div>
+        <a href="@Url.Action("Edit")" class="btn btn-primary">
+            <i class="bi bi-pencil me-2"></i>
+            Editar Parâmetros
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    @if (Model == null)
+                    {
+                        <div class="text-center py-4">
+                            <i class="bi bi-gear-wide-connected text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3">Nenhum parâmetro configurado.</p>
+                            <a href="@Url.Action("Edit")" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Configurar Parâmetros
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-type-h1 me-1"></i>
+                                    Cabeçalho do Sistema
+                                </label>
+                                <div class="form-control-plaintext">
+                                    @Model.CabecalhoSistema
+                                </div>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Exibido na tela de login e em todos os cabeçalhos do sistema
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-tag me-1"></i>
+                                    Versão do Sistema
+                                </label>
+                                <div class="form-control-plaintext">
+                                    @Model.VersaoSistema
+                                </div>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Exibida no rodapé da tela inicial
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    Última Alteração
+                                </label>
+                                <div class="form-control-plaintext">
+                                    @Model.DataAlteracao.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-type me-1"></i>
+                                    Nome do Rodapé
+                                </label>
+                                <div class="form-control-plaintext">
+                                    @Model.NomeRodape
+                                </div>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Substitui o rodapé padrão em todo o sistema
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-calendar-plus me-1"></i>
+                                    Data de Criação
+                                </label>
+                                <div class="form-control-plaintext">
+                                    @Model.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end">
+                                    <a href="@Url.Action("Edit")" class="btn btn-primary">
+                                        <i class="bi bi-pencil me-2"></i>
+                                        Editar Parâmetros
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+}
+
+.form-control-plaintext {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-label {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+</style> 
