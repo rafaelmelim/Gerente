@@ -49,6 +49,12 @@ namespace Gerente.Models
                 if (string.IsNullOrEmpty(cipherText))
                     return "";
 
+                // Se não parece ser Base64, retorna como texto puro
+                if (!IsBase64String(cipherText))
+                {
+                    return cipherText;
+                }
+
                 byte[] fullCipher;
                 try
                 {
@@ -56,7 +62,7 @@ namespace Gerente.Models
                 }
                 catch (FormatException)
                 {
-                    // Não é Base64, pode ser texto puro antigo
+                    // Não é Base64 válido, retorna como texto puro
                     return cipherText;
                 }
 
@@ -77,8 +83,21 @@ namespace Gerente.Models
 #if DEBUG
                 Console.WriteLine($"Erro ao descriptografar: {ex.Message} | Valor: {cipherText}");
 #endif
-                // Fallback: retorna string vazia para não quebrar o sistema
-                return "";
+                // Fallback: retorna o texto original se não conseguir descriptografar
+                return cipherText;
+            }
+        }
+
+        private static bool IsBase64String(string base64)
+        {
+            try
+            {
+                System.Convert.FromBase64String(base64);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

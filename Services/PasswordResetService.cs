@@ -10,10 +10,12 @@ namespace Gerente.Services
     public class PasswordResetService
     {
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PasswordResetService(IConfiguration configuration)
+        public PasswordResetService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> RequestPasswordResetAsync(string email)
@@ -291,8 +293,37 @@ namespace Gerente.Services
 
         private string GetBaseUrl()
         {
-            // Em produção, isso deve vir da configuração
-            return "http://localhost:5144"; // Ajuste conforme necessário
+            try
+            {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext != null)
+                {
+                    var request = httpContext.Request;
+                    var host = request.Host.Host;
+                    var port = request.Host.Port?.ToString() ?? "";
+                    
+                    // Se não há porta especificada, usar a porta padrão baseada no protocolo
+                    if (string.IsNullOrEmpty(port))
+                    {
+                        port = request.IsHttps ? "443" : "80";
+                    }
+                    
+                    // Se a porta é 80 (HTTP) ou 443 (HTTPS), não incluir no URL
+                    var portSegment = (port == "80" || port == "443") ? "" : $":{port}";
+                    
+                    return $"{request.Scheme}://{host}{portSegment}";
+                }
+                
+                // Fallback se não conseguir obter o contexto HTTP
+                return "http://localhost:5144";
+            }
+            catch (Exception ex)
+            {
+                // Log do erro (em produção, usar um sistema de logging adequado)
+                Console.WriteLine($"Erro ao obter URL base da aplicação: {ex.Message}");
+                // Fallback para configuração padrão
+                return "http://localhost:5144";
+            }
         }
 
         private string GenerateEmailBody(string resetUrl)

@@ -1,0 +1,108 @@
+@model List<Gerente.Models.ParametroAmbiente>
+
+@{
+    ViewData["Title"] = "Parâmetros de Ambientes";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-server me-2"></i>
+            Parâmetros de Ambientes
+        </h1>
+        <a href="@Url.Action("Create", "ParametroAmbiente")" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>
+            Novo Ambiente
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>Status</th>
+                                <th>Data de Criação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-medium">@item.Nome</div>
+                                    </td>
+                                    <td>
+                                        @if (item.Ativo)
+                                        {
+                                            <span class="badge bg-success">Ativo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inativo</span>
+                                        }
+                                    </td>
+                                    <td>@item.DataCriacao.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Edit", "ParametroAmbiente", new { id = item.Id })" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger" 
+                                                    title="Excluir"
+                                                    onclick="excluirAmbiente(@item.Id, '@item.Nome')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-server display-1 text-muted mb-3"></i>
+                <h4 class="text-muted">Nenhum ambiente encontrado</h4>
+                <p class="text-muted">Clique no botão "Novo Ambiente" para começar a criar seus parâmetros de ambientes.</p>
+                <a href="@Url.Action("Create", "ParametroAmbiente")" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Criar Primeiro Ambiente
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function excluirAmbiente(id, nome) {
+            if (confirm(`Tem certeza que deseja excluir o ambiente "${nome}"?`)) {
+                $.post('@Url.Action("Delete", "ParametroAmbiente")', { id: id })
+                    .done(function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert('Erro ao excluir: ' + response.message);
+                        }
+                    })
+                    .fail(function() {
+                        alert('Erro ao excluir o ambiente.');
+                    });
+            }
+        }
+    </script>
+} 

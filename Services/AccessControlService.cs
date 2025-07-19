@@ -96,6 +96,12 @@ namespace Gerente.Services
                 return HasAccessToProjects(userId);
             return false;
         }
+        public bool HasAccessToBacklogArquitetura(string userIdStr)
+        {
+            if (int.TryParse(userIdStr, out int userId))
+                return HasAccessToBacklogArquitetura(userId);
+            return false;
+        }
         public bool HasAccessToReports(string userIdStr)
         {
             if (int.TryParse(userIdStr, out int userId))
@@ -131,6 +137,11 @@ namespace Gerente.Services
             return HasAccess(userId, "projetos");
         }
 
+        public bool HasAccessToBacklogArquitetura(int userId)
+        {
+            return HasAccess(userId, "backlog_arquitetura");
+        }
+
         public bool HasAccessToReports(int userId)
         {
             return HasAccess(userId, "relatorios");
@@ -153,6 +164,7 @@ namespace Gerente.Services
                 "configuracoes" => "acesso_configuracoes",
                 "usuarios" => "acesso_usuarios",
                 "projetos" => "acesso_projetos",
+                "backlog_arquitetura" => "acesso_backlog_arquitetura",
                 "relatorios" => "acesso_relatorios",
                 "parametros_sistema" => "acesso_parametros_sistema",
                 "total" => "acesso_total",
@@ -176,8 +188,8 @@ namespace Gerente.Services
                     conn.Open();
                     using (var cmd = new NpgsqlCommand(
                         @"SELECT pa.id, pa.nome, pa.descricao, pa.acesso_configuracoes, 
-                                 pa.acesso_usuarios, pa.acesso_projetos, pa.acesso_relatorios, 
-                                 pa.acesso_total, pa.ativo
+                                 pa.acesso_usuarios, pa.acesso_projetos, pa.acesso_backlog_arquitetura,
+                                 pa.acesso_relatorios, pa.acesso_total, pa.ativo
                           FROM usuarios u 
                           JOIN perfis_acesso pa ON u.perfil_acesso_id = pa.id 
                           WHERE u.id = @userId AND u.ativo = true", conn))
@@ -195,9 +207,10 @@ namespace Gerente.Services
                                     AcessoConfiguracoes = reader.IsDBNull(3) ? false : reader.GetBoolean(3),
                                     AcessoUsuarios = reader.IsDBNull(4) ? false : reader.GetBoolean(4),
                                     AcessoProjetos = reader.IsDBNull(5) ? false : reader.GetBoolean(5),
-                                    AcessoRelatorios = reader.IsDBNull(6) ? false : reader.GetBoolean(6),
-                                    AcessoTotal = reader.IsDBNull(7) ? false : reader.GetBoolean(7),
-                                    Ativo = reader.IsDBNull(8) ? false : reader.GetBoolean(8)
+                                    AcessoBacklogArquitetura = reader.IsDBNull(6) ? false : reader.GetBoolean(6),
+                                    AcessoRelatorios = reader.IsDBNull(7) ? false : reader.GetBoolean(7),
+                                    AcessoTotal = reader.IsDBNull(8) ? false : reader.GetBoolean(8),
+                                    Ativo = reader.IsDBNull(9) ? false : reader.GetBoolean(9)
                                 };
                             }
                         }

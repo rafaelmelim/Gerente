@@ -25,17 +25,32 @@
             <div class="sidebar-content p-3">
                 <ul class="nav flex-column">
                     <li class="nav-item mb-2">
-                        <a class="nav-link text-white-50 sidebar-link" href="#" data-bs-toggle="tooltip" title="Dashboard">
+                        <a class="nav-link text-white-50 sidebar-link" href="@Url.Action("Index", "Home")" data-bs-toggle="tooltip" title="Dashboard">
                             <i class="bi bi-speedometer2 me-2"></i>
                             <span class="sidebar-text">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item mb-2">
-                        <a class="nav-link text-white-50 sidebar-link" href="#" data-bs-toggle="tooltip" title="Projetos">
+                        <a class="nav-link text-white-50 sidebar-link" href="@Url.Action("Index", "Projetos")" data-bs-toggle="tooltip" title="Projetos">
                             <i class="bi bi-folder-fill me-2"></i>
                             <span class="sidebar-text">Projetos</span>
                         </a>
                     </li>
+                    @if (Context.Session.GetInt32("UserId").HasValue)
+                    {
+                        var accessControlService = Context.RequestServices.GetService<Gerente.Services.AccessControlService>();
+                        var userId = Context.Session.GetInt32("UserId").GetValueOrDefault();
+                        
+                        @if (accessControlService?.HasAccessToBacklogArquitetura(userId) == true)
+                        {
+                            <li class="nav-item mb-2">
+                                <a class="nav-link text-white-50 sidebar-link" href="@Url.Action("Index", "BacklogArquitetura")" data-bs-toggle="tooltip" title="Backlog Projetos">
+                                    <i class="bi bi-kanban me-2"></i>
+                                    <span class="sidebar-text">Backlog Projetos</span>
+                                </a>
+                            </li>
+                        }
+                    }
                     @if (Context.Session.GetInt32("UserId").HasValue)
                     {
                         var accessControlService = Context.RequestServices.GetService<Gerente.Services.AccessControlService>();
@@ -52,7 +67,7 @@
                         }
                     }
                     <li class="nav-item mb-2">
-                        <a class="nav-link text-white-50 sidebar-link" href="#" data-bs-toggle="tooltip" title="Relatórios">
+                        <a class="nav-link text-white-50 sidebar-link" href="@Url.Action("Index", "Relatorios")" data-bs-toggle="tooltip" title="Relatórios">
                             <i class="bi bi-graph-up me-2"></i>
                             <span class="sidebar-text">Relatórios</span>
                         </a>
@@ -100,6 +115,18 @@
                                                     Parâmetro do Sistema
                                                 </a>
                                             </li>
+                                            <li>
+                                                <a class="dropdown-item" href="@Url.Action("Index", "ParametroGanho")">
+                                                    <i class="bi bi-trophy me-2"></i>
+                                                    Parâmetros de Ganhos
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="@Url.Action("Index", "ParametroAmbiente")">
+                                                    <i class="bi bi-server me-2"></i>
+                                                    Parâmetros de Ambientes
+                                                </a>
+                                            </li>
                                         }
                                     </ul>
                                 </div>
@@ -136,14 +163,15 @@
                 </main>
             </div>
             
-            <footer class="border-top footer text-muted mt-4">
+            <!-- Footer centralizado na parte inferior -->
+            <footer class="footer text-muted">
                 <div class="container-fluid">
-                    <div class="row align-items-center">
-                        <div class="col-md-6 col-12">
-                            @(ViewBag.NomeRodape ?? "Sistema DorowCamp 2025©")
-                        </div>
-                        <div class="col-md-6 col-12 text-md-end text-center">
-                            <small class="text-muted">
+                    <div class="row justify-content-center align-items-center">
+                        <div class="col-auto">
+                            <span class="footer-text me-3">
+                                @(ViewBag.NomeRodape ?? "Sistema DorowCamp 2025©")
+                            </span>
+                            <small class="version-text">
                                 Versão @(ViewBag.VersaoSistema ?? "1.0.0")
                             </small>
                         </div>

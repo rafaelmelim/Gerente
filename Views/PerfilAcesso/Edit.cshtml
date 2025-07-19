@@ -111,6 +111,13 @@
                                             </label>
                                         </div>
                                         <div class="form-check form-switch mb-2">
+                                            <input asp-for="AcessoBacklogArquitetura" class="form-check-input" />
+                                            <label asp-for="AcessoBacklogArquitetura" class="form-check-label">
+                                                <i class="bi bi-kanban me-1"></i>
+                                                Backlog Arquitetura e Projetos
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
                                             <input asp-for="AcessoRelatorios" class="form-check-input" />
                                             <label asp-for="AcessoRelatorios" class="form-check-label">
                                                 <i class="bi bi-graph-up me-1"></i>
@@ -164,6 +171,10 @@
                             <strong>Projetos:</strong> Criação e gestão de projetos
                         </li>
                         <li class="mb-2">
+                            <i class="bi bi-kanban text-info me-2"></i>
+                            <strong>Backlog Arquitetura e Projetos:</strong> Cadastro de Backlogs
+                        </li>
+                        <li class="mb-2">
                             <i class="bi bi-graph-up text-secondary me-2"></i>
                             <strong>Relatórios:</strong> Visualização de relatórios
                         </li>
@@ -196,25 +207,74 @@
         function toggleAcessoTotal() {
             const acessoTotal = document.getElementById('acessoTotal');
             const permissoesEspecificas = document.getElementById('permissoesEspecificas');
-            const checkboxes = permissoesEspecificas.querySelectorAll('input[type="checkbox"]');
+            
+            // Selecionar todos os checkboxes de permissões específicas
+            const checkboxesEspecificas = permissoesEspecificas.querySelectorAll('input[type="checkbox"]');
+            
+            // Selecionar todos os checkboxes de funcionalidades (fora do div permissoesEspecificas)
+            const checkboxesFuncionalidades = document.querySelectorAll('input[type="checkbox"][name*="Acesso"]:not(#acessoTotal)');
             
             if (acessoTotal.checked) {
+                // Quando Acesso Total está marcado
                 permissoesEspecificas.style.opacity = '0.5';
-                checkboxes.forEach(cb => {
+                
+                // Marcar e desabilitar todos os checkboxes de permissões específicas
+                checkboxesEspecificas.forEach(cb => {
                     cb.checked = true;
                     cb.disabled = true;
                 });
+                
+                // Marcar e desabilitar todos os checkboxes de funcionalidades
+                checkboxesFuncionalidades.forEach(cb => {
+                    if (cb.id !== 'acessoTotal') {
+                        cb.checked = true;
+                        cb.disabled = true;
+                        cb.closest('.form-check').style.opacity = '0.5';
+                    }
+                });
             } else {
+                // Quando Acesso Total está desmarcado
                 permissoesEspecificas.style.opacity = '1';
-                checkboxes.forEach(cb => {
+                
+                // Habilitar todos os checkboxes de permissões específicas
+                checkboxesEspecificas.forEach(cb => {
                     cb.disabled = false;
                 });
+                
+                // Habilitar todos os checkboxes de funcionalidades
+                checkboxesFuncionalidades.forEach(cb => {
+                    if (cb.id !== 'acessoTotal') {
+                        cb.disabled = false;
+                        cb.closest('.form-check').style.opacity = '1';
+                    }
+                });
             }
+        }
+
+        // Função para validar o formulário antes do envio
+        function validarFormulario() {
+            const acessoTotal = document.getElementById('acessoTotal');
+            const form = document.querySelector('form');
+            
+            if (acessoTotal.checked) {
+                // Se Acesso Total está marcado, garantir que todos os campos sejam enviados como true
+                const checkboxes = document.querySelectorAll('input[type="checkbox"][name*="Acesso"]:not(#acessoTotal)');
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                    cb.disabled = false; // Temporariamente habilitar para envio
+                });
+            }
+            
+            return true; // Permitir envio do formulário
         }
 
         // Inicializar estado
         document.addEventListener('DOMContentLoaded', function() {
             toggleAcessoTotal();
+            
+            // Adicionar validação ao formulário
+            const form = document.querySelector('form');
+            form.addEventListener('submit', validarFormulario);
         });
     </script>
 } 

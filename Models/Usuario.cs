@@ -33,6 +33,10 @@ namespace Gerente.Models
         
         [Display(Name = "Perfil de Acesso")]
         public string? PerfilAcessoNome { get; set; }
+        
+        [Required(ErrorMessage = "O status do usuário é obrigatório")]
+        [Display(Name = "Status")]
+        public bool Ativo { get; set; } = true;
     }
 
     public class UsuarioViewModel
@@ -73,5 +77,9 @@ namespace Gerente.Models
         
         [Display(Name = "Perfil de Acesso")]
         public string? PerfilAcessoNome { get; set; }
+        
+        [Required(ErrorMessage = "O status do usuário é obrigatório")]
+        [Display(Name = "Status")]
+        public bool Ativo { get; set; } = true;
     }
 } 

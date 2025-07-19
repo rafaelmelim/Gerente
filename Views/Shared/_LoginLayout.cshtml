@@ -21,13 +21,13 @@
     </div>
     
     <footer class="login-footer">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6 col-12">
-                    <p>@(ViewBag.NomeRodape ?? "Sistema DorowCamp 2025©")</p>
-                </div>
-                <div class="col-md-6 col-12 text-md-end text-center">
-                    <small class="text-muted">
+        <div class="container-fluid">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-auto">
+                    <span class="footer-text me-3">
+                        @(ViewBag.NomeRodape ?? "Sistema DorowCamp 2025©")
+                    </span>
+                    <small class="version-text">
                         Versão @(ViewBag.VersaoSistema ?? "1.0.0")
                     </small>
                 </div>
@@ -42,11 +42,11 @@
         $(document).ready(function() {
             const form = $('#loginForm');
             const loginBtn = $('#loginBtn');
-            const usernameInput = $('#username');
+            const emailInput = $('#email');
             const senhaInput = $('#senha');
             
             // Validação em tempo real
-            usernameInput.on('input', function() {
+            emailInput.on('input', function() {
                 validateField($(this), $(this).val().trim() !== '');
             });
             
@@ -58,12 +58,12 @@
             form.on('submit', function(e) {
                 let isValid = true;
                 
-                // Validar usuário
-                if (usernameInput.val().trim() === '') {
-                    validateField(usernameInput, false);
+                // Validar e-mail
+                if (emailInput.val().trim() === '') {
+                    validateField(emailInput, false);
                     isValid = false;
                 } else {
-                    validateField(usernameInput, true);
+                    validateField(emailInput, true);
                 }
                 
                 // Validar senha
@@ -95,10 +95,10 @@
             }
             
             // Foco automático no primeiro campo
-            usernameInput.focus();
+            emailInput.focus();
             
             // Suporte a Enter para navegar entre campos
-            usernameInput.on('keypress', function(e) {
+            emailInput.on('keypress', function(e) {
                 if (e.which === 13) {
                     senhaInput.focus();
                 }

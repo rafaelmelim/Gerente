@@ -35,6 +35,7 @@
                                 <th>Nome</th>
                                 <th>E-mail</th>
                                 <th>Perfil de Acesso</th>
+                                <th>Status</th>
                                 <th>Data de Criação</th>
                                 <th>Última Alteração</th>
                                 <th width="150">Ações</th>
@@ -77,6 +78,22 @@
                                             <span class="badge bg-secondary">
                                                 <i class="bi bi-shield-x me-1"></i>
                                                 Sem perfil
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (usuario.Ativo)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Ativo
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-x-circle me-1"></i>
+                                                Inativo
                                             </span>
                                         }
                                     </td>

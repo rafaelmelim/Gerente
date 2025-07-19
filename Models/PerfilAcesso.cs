@@ -24,6 +24,9 @@ namespace Gerente.Models
         [Display(Name = "Acesso a Projetos")]
         public bool AcessoProjetos { get; set; }
         
+        [Display(Name = "Acesso a Backlog Arquitetura e Projetos")]
+        public bool AcessoBacklogArquitetura { get; set; }
+        
         [Display(Name = "Acesso a Relatórios")]
         public bool AcessoRelatorios { get; set; }
         
@@ -61,6 +64,9 @@ namespace Gerente.Models
         
         [Display(Name = "Acesso a Projetos")]
         public bool AcessoProjetos { get; set; }
+        
+        [Display(Name = "Acesso a Backlog Arquitetura e Projetos")]
+        public bool AcessoBacklogArquitetura { get; set; }
         
         [Display(Name = "Acesso a Relatórios")]
         public bool AcessoRelatorios { get; set; }

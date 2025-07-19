@@ -5,14 +5,18 @@ using Npgsql;
 using Gerente.Models;
 using System.Collections.Generic; // Added missing import
 using Gerente.Filters;
+using Gerente.Services;
 
 namespace Gerente.Controllers
 {
     [RequireUsersAccess]
     public class UsuarioController : BaseController
     {
+        private readonly UsuarioAtivacaoService _ativacaoService;
+
         public UsuarioController(IConfiguration configuration) : base(configuration)
         {
+            _ativacaoService = new UsuarioAtivacaoService(configuration);
         }
 
         public IActionResult Index()
@@ -83,7 +87,8 @@ namespace Gerente.Controllers
                 PerfilAcessoId = usuario.PerfilAcessoId,
                 PerfilAcessoNome = usuario.PerfilAcessoNome,
                 DataCriacao = usuario.DataCriacao,
-                DataAlteracao = usuario.DataAlteracao
+                DataAlteracao = usuario.DataAlteracao,
+                Ativo = usuario.Ativo
             };
 
             ViewBag.PerfisAcesso = ObterPerfisAcesso();
@@ -92,7 +97,7 @@ namespace Gerente.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(UsuarioViewModel usuarioViewModel)
+        public async Task<IActionResult> Edit(UsuarioViewModel usuarioViewModel)
         {
             if (ModelState.IsValid)
             {
@@ -106,6 +111,10 @@ namespace Gerente.Controllers
                         return View(usuarioViewModel);
                     }
 
+                    // Obter dados atuais do usuário para verificar se foi ativado
+                    var usuarioAtual = ObterUsuarioPorId(usuarioViewModel.Id);
+                    bool foiAtivado = usuarioAtual != null && !usuarioAtual.Ativo && usuarioViewModel.Ativo;
+
                     // Se a senha foi alterada, criar novo hash
                     string? senhaHash = null;
                     if (!string.IsNullOrEmpty(usuarioViewModel.Senha))
@@ -116,7 +125,47 @@ namespace Gerente.Controllers
                     // Atualizar usuário
                     AtualizarUsuario(usuarioViewModel, senhaHash);
 
-                    TempData["Sucesso"] = "Usuário atualizado com sucesso!";
+                    // Se o usuário foi ativado, enviar e-mail
+                    if (foiAtivado)
+                    {
+                        try
+                        {
+                            // Usar a senha do campo "Confirmar Nova Senha" se estiver preenchida
+                            string senhaParaEmail = "";
+                            if (!string.IsNullOrEmpty(usuarioViewModel.ConfirmarSenha))
+                            {
+                                senhaParaEmail = usuarioViewModel.ConfirmarSenha;
+                                Console.WriteLine($"Usando senha do formulário: {senhaParaEmail}");
+                            }
+                            else
+                            {
+                                // Se não houver senha no formulário, gerar uma nova
+                                senhaParaEmail = GerarSenhaTemporaria();
+                                Console.WriteLine($"Gerando nova senha: {senhaParaEmail}");
+                            }
+
+                            // Criptografar a senha antes de enviar no email
+                            string senhaCriptografada = CryptoUtils.Encrypt(senhaParaEmail);
+
+                            await _ativacaoService.EnviarEmailAtivacaoAsync(
+                                usuarioViewModel.Email, 
+                                usuarioViewModel.Nome, 
+                                senhaCriptografada
+                            );
+
+                            TempData["Sucesso"] = "Usuário atualizado com sucesso! E-mail de ativação enviado com a senha definida.";
+                        }
+                        catch (Exception ex)
+                        {
+                            TempData["Sucesso"] = "Usuário atualizado com sucesso!";
+                            TempData["Aviso"] = "E-mail de ativação não foi enviado: " + ex.Message;
+                        }
+                    }
+                    else
+                    {
+                        TempData["Sucesso"] = "Usuário atualizado com sucesso!";
+                    }
+
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
@@ -194,7 +243,7 @@ namespace Gerente.Controllers
                 conn.Open();
                 using (var cmd = new NpgsqlCommand(
                     @"SELECT u.id, u.nome, u.email, u.data_criacao, u.data_atualizacao, 
-                             u.perfil_acesso_id, p.nome as perfil_nome 
+                             u.perfil_acesso_id, p.nome as perfil_nome, u.ativo 
                       FROM usuarios u 
                       LEFT JOIN perfis_acesso p ON u.perfil_acesso_id = p.id 
                       ORDER BY u.nome", conn))
@@ -211,7 +260,8 @@ namespace Gerente.Controllers
                                 PerfilAcessoId = reader.IsDBNull(5) ? null : (int?)reader.GetInt32(5),
                                 PerfilAcessoNome = reader.IsDBNull(6) ? null : reader.GetString(6),
                                 DataCriacao = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3),
-                                DataAlteracao = reader.IsDBNull(4) ? DateTime.MinValue : reader.GetDateTime(4)
+                                DataAlteracao = reader.IsDBNull(4) ? DateTime.MinValue : reader.GetDateTime(4),
+                                Ativo = reader.IsDBNull(7) ? true : reader.GetBoolean(7)
                             });
                         }
                     }
@@ -235,7 +285,7 @@ namespace Gerente.Controllers
                 conn.Open();
                 using (var cmd = new NpgsqlCommand(
                     @"SELECT u.id, u.nome, u.email, u.data_criacao, u.data_atualizacao, 
-                             u.perfil_acesso_id, p.nome as perfil_nome 
+                             u.perfil_acesso_id, p.nome as perfil_nome, u.ativo 
                       FROM usuarios u 
                       LEFT JOIN perfis_acesso p ON u.perfil_acesso_id = p.id 
                       WHERE u.id = @id", conn))
@@ -253,7 +303,8 @@ namespace Gerente.Controllers
                                 PerfilAcessoId = reader.IsDBNull(5) ? null : (int?)reader.GetInt32(5),
                                 PerfilAcessoNome = reader.IsDBNull(6) ? null : reader.GetString(6),
                                 DataCriacao = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3),
-                                DataAlteracao = reader.IsDBNull(4) ? DateTime.MinValue : reader.GetDateTime(4)
+                                DataAlteracao = reader.IsDBNull(4) ? DateTime.MinValue : reader.GetDateTime(4),
+                                Ativo = reader.IsDBNull(7) ? true : reader.GetBoolean(7)
                             };
                         }
                     }
@@ -308,12 +359,13 @@ namespace Gerente.Controllers
             {
                 conn.Open();
                 using (var cmd = new NpgsqlCommand(
-                    "INSERT INTO usuarios (nome, email, senha, perfil_acesso_id, data_criacao, data_atualizacao) VALUES (@nome, @email, @senha, @perfilAcessoId, @dataCriacao, @dataAlteracao)", conn))
+                    "INSERT INTO usuarios (nome, email, senha, perfil_acesso_id, ativo, data_criacao, data_atualizacao) VALUES (@nome, @email, @senha, @perfilAcessoId, @ativo, @dataCriacao, @dataAlteracao)", conn))
                 {
                     cmd.Parameters.AddWithValue("@nome", usuarioViewModel.Nome);
                     cmd.Parameters.AddWithValue("@email", usuarioViewModel.Email);
                     cmd.Parameters.AddWithValue("@senha", senhaHash);
                     cmd.Parameters.AddWithValue("@perfilAcessoId", usuarioViewModel.PerfilAcessoId ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ativo", usuarioViewModel.Ativo);
                     cmd.Parameters.AddWithValue("@dataCriacao", DateTime.Now);
                     cmd.Parameters.AddWithValue("@dataAlteracao", DateTime.Now);
                     cmd.ExecuteNonQuery();
@@ -334,7 +386,7 @@ namespace Gerente.Controllers
             {
                 conn.Open();
                 
-                string sql = "UPDATE usuarios SET nome = @nome, email = @email, perfil_acesso_id = @perfilAcessoId, data_atualizacao = @dataAlteracao";
+                string sql = "UPDATE usuarios SET nome = @nome, email = @email, perfil_acesso_id = @perfilAcessoId, ativo = @ativo, data_atualizacao = @dataAlteracao";
                 if (!string.IsNullOrEmpty(senhaHash))
                 {
                     sql += ", senha = @senha";
@@ -347,6 +399,7 @@ namespace Gerente.Controllers
                     cmd.Parameters.AddWithValue("@nome", usuarioViewModel.Nome);
                     cmd.Parameters.AddWithValue("@email", usuarioViewModel.Email);
                     cmd.Parameters.AddWithValue("@perfilAcessoId", usuarioViewModel.PerfilAcessoId ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ativo", usuarioViewModel.Ativo);
                     cmd.Parameters.AddWithValue("@dataAlteracao", DateTime.Now);
                     
                     if (!string.IsNullOrEmpty(senhaHash))
@@ -437,6 +490,42 @@ namespace Gerente.Controllers
             {
                 var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return System.Convert.ToBase64String(hashedBytes);
+            }
+        }
+
+        private string GerarSenhaTemporaria()
+        {
+            const string caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            var senha = new char[8];
+            
+            for (int i = 0; i < 8; i++)
+            {
+                senha[i] = caracteres[random.Next(caracteres.Length)];
+            }
+            
+            return new string(senha);
+        }
+
+        private void AtualizarSenhaUsuario(int id, string senhaHash)
+        {
+            string? connString = _configuration.GetConnectionString("DefaultConnection");
+            
+            if (string.IsNullOrEmpty(connString))
+            {
+                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            }
+
+            using (var conn = new NpgsqlConnection(connString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand("UPDATE usuarios SET senha = @senha, data_atualizacao = @dataAlteracao WHERE id = @id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@senha", senhaHash);
+                    cmd.Parameters.AddWithValue("@dataAlteracao", DateTime.Now);
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
     }

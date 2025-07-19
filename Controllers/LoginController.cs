@@ -5,16 +5,19 @@ using Npgsql;
 using System.Data;
 using Gerente.Services;
 using Gerente.Models;
+using System.Security.Cryptography;
 
 namespace Gerente.Controllers
 {
     public class LoginController : BaseController
     {
         private readonly PasswordResetService _passwordResetService;
+        private readonly EmailService _emailService;
 
-        public LoginController(IConfiguration configuration, PasswordResetService passwordResetService) : base(configuration)
+        public LoginController(IConfiguration configuration, PasswordResetService passwordResetService, EmailService emailService) : base(configuration)
         {
             _passwordResetService = passwordResetService;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -48,7 +51,7 @@ namespace Gerente.Controllers
                 conn.Open();
                 
                 // Buscar o usuário pelo e-mail
-                using (var cmd = new NpgsqlCommand("SELECT id, email, nome, senha FROM usuarios WHERE email = @email", conn))
+                using (var cmd = new NpgsqlCommand("SELECT id, email, nome, senha, ativo FROM usuarios WHERE email = @email", conn))
                 {
                     cmd.Parameters.AddWithValue("@email", email);
                     using (var reader = cmd.ExecuteReader())
@@ -59,6 +62,18 @@ namespace Gerente.Controllers
                             var userEmail = reader.GetString(1);
                             var userName = reader.IsDBNull(2) ? "" : reader.GetString(2);
                             var storedPassword = reader.GetString(3);
+                            var userAtivo = reader.IsDBNull(4) ? false : reader.GetBoolean(4);
+                            
+                            // Verificar se o usuário está ativo
+                            if (!userAtivo)
+                            {
+                                if (isAjax)
+                                {
+                                    return Json(new { success = false, message = "Usuário inativo. Entre em contato com o administrador." });
+                                }
+                                ViewBag.Error = "Usuário inativo. Entre em contato com o administrador.";
+                                return View();
+                            }
                             
                             // Verificar se a senha está em hash ou texto plano (para compatibilidade)
                             var hashedPassword = HashPassword(password);
@@ -103,6 +118,8 @@ namespace Gerente.Controllers
                         }
                     }
                 }
+                
+                // Se chegou aqui, o usuário não foi encontrado
                 
                 if (isAjax)
                 {
@@ -302,6 +319,72 @@ namespace Gerente.Controllers
             });
         }
 
+        [HttpGet]
+        public IActionResult TestLogin(string email, string password)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+                {
+                    return Json(new { success = false, message = "Email e senha são obrigatórios" });
+                }
+
+                string? connString = _configuration.GetConnectionString("DefaultConnection");
+                if (string.IsNullOrEmpty(connString))
+                {
+                    return Json(new { success = false, message = "Connection string não encontrada" });
+                }
+
+                using (var conn = new NpgsqlConnection(connString))
+                {
+                    conn.Open();
+                    
+                    // Verificar se o usuário existe
+                    using (var cmd = new NpgsqlCommand("SELECT id, email, nome, senha, ativo FROM usuarios WHERE email = @email", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@email", email);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                var userId = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
+                                var userEmail = reader.GetString(1);
+                                var userName = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                                var storedPassword = reader.GetString(3);
+                                var userAtivo = reader.IsDBNull(4) ? false : reader.GetBoolean(4);
+                                
+                                var hashedPassword = HashPassword(password);
+                                
+                                return Json(new { 
+                                    success = true, 
+                                    message = "Usuário encontrado",
+                                    data = new {
+                                        userId = userId,
+                                        email = userEmail,
+                                        name = userName,
+                                        active = userAtivo,
+                                        storedPassword = storedPassword,
+                                        inputPassword = password,
+                                        hashedPassword = hashedPassword,
+                                        hashMatch = storedPassword == hashedPassword,
+                                        plainMatch = storedPassword == password
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                return Json(new { success = false, message = "Usuário não encontrado" });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Erro: {ex.Message}" });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> ResetPassword([FromBody] PasswordResetConfirm request)
         {
@@ -335,6 +418,116 @@ namespace Gerente.Controllers
             catch (Exception)
             {
                 return Json(new { success = false, message = "Erro ao alterar senha. Tente novamente." });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult CriarConta()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CriarConta(CriarContaViewModel model)
+        {
+            Console.WriteLine($"=== CRIAR CONTA INICIADO ===");
+            Console.WriteLine($"Email: {model.Email}");
+            Console.WriteLine($"Nome: {model.Nome}");
+            
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("ModelState inválido!");
+                return View(model);
+            }
+
+            try
+            {
+                Console.WriteLine("Verificando se email já existe...");
+                // Verificar se o e-mail já existe
+                if (EmailExisteNoCadastro(model.Email))
+                {
+                    Console.WriteLine("Email já existe no cadastro!");
+                    ModelState.AddModelError("Email", "E-mail já cadastrado no sistema.");
+                    return View(model);
+                }
+
+                Console.WriteLine("Gerando senha temporária...");
+                // Gerar senha temporária
+                var senhaTemporaria = GerarSenhaTemporaria();
+                var senhaHash = HashPassword(senhaTemporaria);
+
+                Console.WriteLine("Salvando usuário...");
+                // Salvar usuário com status inativo
+                var userId = await SalvarUsuarioTemporario(model, senhaHash);
+                if (userId == null)
+                {
+                    Console.WriteLine("ERRO: Falha ao salvar usuário!");
+                    ModelState.AddModelError("", "Erro ao cadastrar usuário. Tente novamente.");
+                    return View(model);
+                }
+
+                Console.WriteLine($"Usuário salvo com ID: {userId}");
+
+                Console.WriteLine("Enviando email de confirmação...");
+                // Enviar e-mail de confirmação para o usuário
+                await _emailService.EnviarEmailConfirmacaoCadastroAsync(model.Email, model.Nome);
+
+                Console.WriteLine("Enviando email de notificação admin...");
+                // Enviar e-mail de notificação para o administrador
+                await _emailService.EnviarEmailNotificacaoAdminAsync(model.Email, model.Nome);
+
+                Console.WriteLine("Emails enviados com sucesso!");
+                TempData["Sucesso"] = "Conta criada com sucesso! Você receberá um e-mail de confirmação e um administrador será notificado para ativar sua conta.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERRO NA CRIAÇÃO DE CONTA: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                ModelState.AddModelError("", $"Erro ao criar conta: {ex.Message}");
+                return View(model);
+            }
+        }
+
+        private string GerarSenhaTemporaria()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 12).Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        private async Task<int?> SalvarUsuarioTemporario(CriarContaViewModel model, string senhaHash)
+        {
+            try
+            {
+                string? connString = _configuration.GetConnectionString("DefaultConnection");
+                if (string.IsNullOrEmpty(connString))
+                {
+                    return null;
+                }
+
+                using (var conn = new NpgsqlConnection(connString))
+                {
+                    await conn.OpenAsync();
+                    using (var cmd = new NpgsqlCommand(
+                        "INSERT INTO usuarios (nome, email, senha, ativo, data_criacao, data_atualizacao) VALUES (@nome, @email, @senha, @ativo, @dataCriacao, @dataAlteracao) RETURNING id", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@nome", model.Nome);
+                        cmd.Parameters.AddWithValue("@email", model.Email);
+                        cmd.Parameters.AddWithValue("@senha", senhaHash);
+                        cmd.Parameters.AddWithValue("@ativo", false); // Usuário inativo por padrão
+                        cmd.Parameters.AddWithValue("@dataCriacao", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@dataAlteracao", DateTime.Now);
+                        
+                        var result = await cmd.ExecuteScalarAsync();
+                        return result != null ? Convert.ToInt32(result) : null;
+                    }
+                }
+            }
+            catch
+            {
+                return null;
             }
         }
     }

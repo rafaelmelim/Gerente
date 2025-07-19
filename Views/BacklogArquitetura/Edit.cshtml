@@ -1,0 +1,305 @@
+@model Gerente.Models.BacklogArquiteturaViewModel
+
+@{
+    ViewData["Title"] = "Editar Backlog";
+}
+
+<!-- Sistema de Mensagens -->
+<div id="messageContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; display: none;">
+    <div id="messageAlert" class="alert alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i id="messageIcon" class="me-2"></i>
+            <span id="messageText"></span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-pencil me-2"></i>
+            Editar Backlog
+        </h1>
+        <a href="@Url.Action("Index", "BacklogArquitetura")" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>
+            Voltar
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="DescricaoTarefa" class="form-label"></label>
+                        <input asp-for="DescricaoTarefa" class="form-control" type="text" maxlength="200" placeholder="Descreva a tarefa..." />
+                        <span asp-validation-for="DescricaoTarefa" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Prioridade" class="form-label"></label>
+                        <select asp-for="Prioridade" class="form-select" asp-items="ViewBag.Prioridades">
+                            <option value="">Selecione...</option>
+                        </select>
+                        <span asp-validation-for="Prioridade" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Ganho" class="form-label"></label>
+                        <select asp-for="Ganho" class="form-select" asp-items="ViewBag.Ganhos">
+                            <option value="">Selecione...</option>
+                        </select>
+                        <span asp-validation-for="Ganho" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="UsuarioId" class="form-label">Usuário</label>
+                        <select asp-for="UsuarioId" class="form-select" asp-items="ViewBag.Usuarios">
+                            <option value="">Selecione...</option>
+                        </select>
+                        <span asp-validation-for="UsuarioId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DataInicio" class="form-label"></label>
+                        <input asp-for="DataInicio" class="form-control" type="date" />
+                        <span asp-validation-for="DataInicio" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DataFim" class="form-label"></label>
+                        <input asp-for="DataFim" class="form-control" type="date" />
+                        <span asp-validation-for="DataFim" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Progresso" class="form-label"></label>
+                        <select asp-for="Progresso" class="form-select" asp-items="ViewBag.Progressos">
+                            <option value="">Selecione...</option>
+                        </select>
+                        <span asp-validation-for="Progresso" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ambientes</label>
+                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                            @if (ViewBag.Ambientes != null)
+                            {
+                                foreach (var ambiente in ViewBag.Ambientes)
+                                {
+                                    var isSelected = Model.AmbientesSelecionados != null && Model.AmbientesSelecionados.Contains(ambiente.Value);
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="AmbientesSelecionados" value="@ambiente.Value" id="ambiente_@ambiente.Value" @(isSelected ? "checked" : "")>
+                                        <label class="form-check-label" for="ambiente_@ambiente.Value">
+                                            @ambiente.Text
+                                        </label>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <small class="form-text text-muted">Selecione um ou mais ambientes</small>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Anotacoes" class="form-label"></label>
+                        <textarea asp-for="Anotacoes" class="form-control" rows="4" placeholder="Anotações sobre a tarefa..."></textarea>
+                        <small class="form-text text-muted">Máximo 4000 caracteres</small>
+                        <span asp-validation-for="Anotacoes" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Anexos" class="form-label"></label>
+                        <input asp-for="Anexos" class="form-control" type="file" multiple />
+                        <small class="form-text text-muted">Selecione um ou mais arquivos para anexar</small>
+                        <span asp-validation-for="Anexos" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="NovoComentario" class="form-label">Novo Comentário</label>
+                        <textarea asp-for="NovoComentario" class="form-control" rows="3" placeholder="Adicione um novo comentário..."></textarea>
+                        <span asp-validation-for="NovoComentario" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="@Url.Action("Index", "BacklogArquitetura")" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Função para exibir mensagens profissionais
+        function showMessage(type, message, duration = 5000) {
+            const container = document.getElementById('messageContainer');
+            const alert = document.getElementById('messageAlert');
+            const icon = document.getElementById('messageIcon');
+            const text = document.getElementById('messageText');
+            
+            // Remover classes anteriores
+            alert.className = 'alert alert-dismissible fade show';
+            
+            // Configurar tipo de mensagem
+            switch(type) {
+                case 'success':
+                    alert.classList.add('alert-success');
+                    icon.className = 'bi bi-check-circle-fill me-2';
+                    break;
+                case 'error':
+                    alert.classList.add('alert-danger');
+                    icon.className = 'bi bi-exclamation-triangle-fill me-2';
+                    break;
+                case 'warning':
+                    alert.classList.add('alert-warning');
+                    icon.className = 'bi bi-exclamation-circle-fill me-2';
+                    break;
+                case 'info':
+                    alert.classList.add('alert-info');
+                    icon.className = 'bi bi-info-circle-fill me-2';
+                    break;
+                default:
+                    alert.classList.add('alert-info');
+                    icon.className = 'bi bi-info-circle-fill me-2';
+            }
+            
+            text.textContent = message;
+            container.style.display = 'block';
+            
+            // Auto-hide após duração especificada
+            setTimeout(() => {
+                container.style.display = 'none';
+            }, duration);
+        }
+
+        // Função para confirmação profissional
+        function showConfirm(message, onConfirm, onCancel = null) {
+            const confirmModal = document.createElement('div');
+            confirmModal.className = 'modal fade';
+            confirmModal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-question-circle-fill me-2 text-primary"></i>
+                                Confirmação
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">${message}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-2"></i>
+                                Cancelar
+                            </button>
+                            <button type="button" class="btn btn-primary" id="confirmBtn">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmModal);
+            
+            const modal = new bootstrap.Modal(confirmModal);
+            modal.show();
+            
+            document.getElementById('confirmBtn').addEventListener('click', () => {
+                modal.hide();
+                if (onConfirm) onConfirm();
+            });
+            
+            confirmModal.addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(confirmModal);
+                if (onCancel) onCancel();
+            });
+        }
+
+        // Validação de datas
+        document.getElementById('DataFim').addEventListener('change', function() {
+            var dataInicio = document.getElementById('DataInicio').value;
+            var dataFim = this.value;
+            
+            if (dataInicio && dataFim && dataFim < dataInicio) {
+                showMessage('warning', 'A data de fim não pode ser anterior à data de início. Deseja corrigir esta informação?');
+                this.value = '';
+                this.focus();
+            }
+        });
+
+        // Contador de caracteres para anotações
+        document.getElementById('Anotacoes').addEventListener('input', function() {
+            var maxLength = 4000;
+            var currentLength = this.value.length;
+            var remaining = maxLength - currentLength;
+            
+            if (remaining < 0) {
+                this.value = this.value.substring(0, maxLength);
+                remaining = 0;
+            }
+            
+            // Atualizar contador se existir
+            var counter = this.parentNode.querySelector('.char-counter');
+            if (!counter) {
+                counter = document.createElement('small');
+                counter.className = 'char-counter form-text text-muted';
+                this.parentNode.appendChild(counter);
+            }
+            counter.textContent = remaining + ' caracteres restantes';
+            
+            // Aviso quando estiver próximo do limite
+            if (remaining <= 100 && remaining > 0) {
+                counter.className = 'char-counter form-text text-warning';
+            } else if (remaining === 0) {
+                counter.className = 'char-counter form-text text-danger';
+                showMessage('warning', 'Limite de caracteres atingido. Deseja continuar com o texto atual?');
+            } else {
+                counter.className = 'char-counter form-text text-muted';
+            }
+        });
+
+        // Validação do formulário antes do envio
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const descricao = document.getElementById('DescricaoTarefa').value.trim();
+            const prioridade = document.getElementById('Prioridade').value;
+            const ganho = document.getElementById('Ganho').value;
+            const usuario = document.getElementById('UsuarioId').value;
+            const progresso = document.getElementById('Progresso').value;
+            
+            if (!descricao || !prioridade || !ganho || !usuario || !progresso) {
+                e.preventDefault();
+                showMessage('warning', 'Existem campos obrigatórios não preenchidos. Deseja revisar as informações antes de continuar?');
+                return false;
+            }
+            
+            showMessage('info', 'Processando solicitação. Aguarde um momento...');
+        });
+
+
+    </script>
+} 

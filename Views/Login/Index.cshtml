@@ -37,9 +37,11 @@
         <div class="invalid-feedback">Por favor, informe sua senha.</div>
     </div>
     
-    <div class="remember-checkbox">
-        <input type="checkbox" id="lembrarSenha" name="lembrarSenha" />
-        <label for="lembrarSenha">Lembrar minha senha</label>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="salvarCredenciais">
+        <label class="form-check-label" for="salvarCredenciais">
+            Salvar as credenciais
+        </label>
     </div>
     
     <button type="submit" class="login-btn" id="loginBtn">
@@ -64,6 +66,9 @@
         </a>
     </div>
 </form>
+
+<!-- Área para alertas -->
+<div id="alertArea"></div>
 
 <!-- Modal Esqueci Minha Senha -->
 <div id="forgotPasswordModal" class="modal-overlay">

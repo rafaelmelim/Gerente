@@ -1,3 +1,214 @@
+// =====================================================
+// FUNCIONALIDADE "SALVAR CREDENCIAIS" COM LOCALSTORAGE
+// =====================================================
+
+// Chaves para localStorage
+const CREDENCIAIS_EMAIL_KEY = 'dorowcamp_credenciais_email';
+const CREDENCIAIS_SENHA_KEY = 'dorowcamp_credenciais_senha';
+const CREDENCIAIS_SALVAR_KEY = 'dorowcamp_credenciais_salvar';
+
+// Função para salvar credenciais no localStorage
+function salvarCredenciaisLocalStorage(email, senha) {
+    try {
+        // Verificar se localStorage está disponível
+        if (typeof(Storage) === "undefined") {
+            console.error('localStorage não está disponível');
+            return false;
+        }
+        
+        // Testar se podemos escrever no localStorage
+        const testKey = 'test_write_' + Date.now();
+        localStorage.setItem(testKey, 'test');
+        const testValue = localStorage.getItem(testKey);
+        localStorage.removeItem(testKey);
+        
+        if (testValue !== 'test') {
+            console.error('localStorage não está funcionando corretamente');
+            return false;
+        }
+        
+        // Salvar credenciais
+        localStorage.setItem(CREDENCIAIS_EMAIL_KEY, email);
+        localStorage.setItem(CREDENCIAIS_SENHA_KEY, senha);
+        localStorage.setItem(CREDENCIAIS_SALVAR_KEY, 'true');
+        
+        console.log('Credenciais salvas no localStorage com sucesso');
+        return true;
+    } catch (error) {
+        console.error('Erro ao salvar credenciais:', error);
+        console.error('Tipo de erro:', error.name);
+        console.error('Mensagem:', error.message);
+        return false;
+    }
+}
+
+// Função para carregar credenciais do localStorage
+function carregarCredenciaisLocalStorage() {
+    try {
+        const email = localStorage.getItem(CREDENCIAIS_EMAIL_KEY);
+        const senha = localStorage.getItem(CREDENCIAIS_SENHA_KEY);
+        const salvar = localStorage.getItem(CREDENCIAIS_SALVAR_KEY);
+        
+        return {
+            email: email || '',
+            senha: senha || '',
+            salvar: salvar === 'true'
+        };
+    } catch (error) {
+        console.error('Erro ao carregar credenciais:', error);
+        return { email: '', senha: '', salvar: false };
+    }
+}
+
+// Função para remover credenciais do localStorage
+function removerCredenciaisLocalStorage() {
+    try {
+        localStorage.removeItem(CREDENCIAIS_EMAIL_KEY);
+        localStorage.removeItem(CREDENCIAIS_SENHA_KEY);
+        localStorage.removeItem(CREDENCIAIS_SALVAR_KEY);
+        console.log('Credenciais removidas do localStorage');
+        return true;
+    } catch (error) {
+        console.error('Erro ao remover credenciais:', error);
+        return false;
+    }
+}
+
+// Função para mostrar alerta Bootstrap
+function mostrarAlerta(tipo, mensagem) {
+    const alertArea = document.getElementById('alertArea');
+    if (!alertArea) return;
+    
+    // Remover alertas anteriores
+    alertArea.innerHTML = '';
+    
+    // Criar novo alerta
+    const alerta = document.createElement('div');
+    alerta.className = `alert alert-${tipo}`;
+    
+    const icone = tipo === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle';
+    alerta.innerHTML = `
+        <i class="bi ${icone}"></i>
+        <span>${mensagem}</span>
+    `;
+    
+    alertArea.appendChild(alerta);
+    
+    // Remover alerta após 5 segundos usando setTimeout()
+    setTimeout(() => {
+        if (alerta.parentNode) {
+            alerta.remove();
+        }
+    }, 5000);
+}
+
+// Função para lidar com mudança no checkbox
+function handleCheckboxChange() {
+    console.log('handleCheckboxChange chamada');
+    
+    const checkbox = document.getElementById('salvarCredenciais');
+    const emailInput = document.getElementById('email');
+    const senhaInput = document.getElementById('senha');
+    
+    if (!checkbox) {
+        console.error('Checkbox não encontrado');
+        return;
+    }
+    if (!emailInput) {
+        console.error('Campo e-mail não encontrado');
+        return;
+    }
+    if (!senhaInput) {
+        console.error('Campo senha não encontrado');
+        return;
+    }
+    
+    console.log('Estado do checkbox:', checkbox.checked);
+    
+    // Verificar se localStorage está disponível
+    if (typeof(Storage) === "undefined") {
+        console.error('localStorage não está disponível');
+        mostrarAlerta('danger', 'localStorage não está disponível neste navegador.');
+        return;
+    }
+    
+    if (checkbox.checked) {
+        // Checkbox marcado - salvar credenciais
+        const email = emailInput.value.trim();
+        const senha = senhaInput.value;
+        
+        console.log('Tentando salvar credenciais:', { email: email ? 'preenchido' : 'vazio', senha: senha ? 'preenchido' : 'vazio' });
+        
+        if (email && senha) {
+            const sucesso = salvarCredenciaisLocalStorage(email, senha);
+            if (sucesso) {
+                mostrarAlerta('success', 'As credenciais foram salvas com sucesso.');
+            } else {
+                mostrarAlerta('danger', 'Erro ao salvar credenciais.');
+            }
+        } else {
+            mostrarAlerta('warning', 'Digite e-mail e senha para salvar as credenciais.');
+        }
+    } else {
+        // Checkbox desmarcado - remover credenciais
+        console.log('Removendo credenciais');
+        const sucesso = removerCredenciaisLocalStorage();
+        if (sucesso) {
+            mostrarAlerta('warning', 'As credenciais não serão salvas.');
+        } else {
+            mostrarAlerta('danger', 'Erro ao remover credenciais.');
+        }
+    }
+}
+
+// Função para inicializar credenciais salvas
+function inicializarCredenciaisSalvas() {
+    console.log('Inicializando credenciais salvas...');
+    
+    // Verificar se localStorage está disponível
+    if (typeof(Storage) === "undefined") {
+        console.error('localStorage não está disponível para inicialização');
+        return;
+    }
+    
+    const credenciais = carregarCredenciaisLocalStorage();
+    const emailInput = document.getElementById('email');
+    const senhaInput = document.getElementById('senha');
+    const checkbox = document.getElementById('salvarCredenciais');
+    
+    if (!emailInput) {
+        console.error('Campo e-mail não encontrado para inicialização');
+        return;
+    }
+    if (!senhaInput) {
+        console.error('Campo senha não encontrado para inicialização');
+        return;
+    }
+    if (!checkbox) {
+        console.error('Checkbox não encontrado para inicialização');
+        return;
+    }
+    
+    console.log('Credenciais encontradas:', { 
+        salvar: credenciais.salvar, 
+        temEmail: !!credenciais.email, 
+        temSenha: !!credenciais.senha 
+    });
+    
+    if (credenciais.salvar && credenciais.email && credenciais.senha) {
+        // Preencher campos
+        emailInput.value = credenciais.email;
+        senhaInput.value = credenciais.senha;
+        
+        // Marcar checkbox
+        checkbox.checked = true;
+        
+        console.log('✅ Credenciais carregadas e campos preenchidos com sucesso');
+    } else {
+        console.log('ℹ️ Nenhuma credencial salva encontrada ou dados incompletos');
+    }
+}
+
 // Funções para o modal "Esqueci minha senha"
 function esqueciSenha() {
     const modal = document.getElementById('forgotPasswordModal');
@@ -26,7 +237,7 @@ function fecharModal() {
 }
 
 function criarConta() {
-    showMessage('info', 'Funcionalidade de criação de conta será implementada em breve.', 5000);
+    window.location.href = '/Login/CriarConta';
 }
 
 // Função para mostrar mensagens
@@ -84,6 +295,68 @@ function getMessageIcon(type) {
 
 // Event listeners quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM carregado - Iniciando configuração do checkbox...');
+
+    // Aguardar um pouco para garantir que todos os elementos estejam carregados
+    setTimeout(() => {
+        // Inicializar credenciais salvas
+        inicializarCredenciaisSalvas();
+        
+        // Adicionar event listener para o checkbox
+        const checkbox = document.getElementById('salvarCredenciais');
+        if (checkbox) {
+            console.log('Checkbox encontrado, adicionando event listener');
+            // Remover event listener anterior se existir
+            checkbox.removeEventListener('change', handleCheckboxChange);
+            // Adicionar novo event listener
+            checkbox.addEventListener('change', handleCheckboxChange);
+            
+            // Adicionar também event listener para clique (para compatibilidade com Chrome)
+            checkbox.addEventListener('click', function(e) {
+                console.log('Clique no checkbox detectado');
+                // Pequeno delay para garantir que o estado seja atualizado
+                setTimeout(() => {
+                    handleCheckboxChange();
+                }, 10);
+            });
+        } else {
+            console.error('Checkbox não encontrado!');
+        }
+        
+                // Adicionar event listeners para os campos de e-mail e senha
+        const emailInput = document.getElementById('email');
+        const senhaInput = document.getElementById('senha');
+        
+        // Event listeners para salvar credenciais quando campos mudarem
+        if (emailInput) {
+            emailInput.addEventListener('input', function() {
+                const checkbox = document.getElementById('salvarCredenciais');
+                if (checkbox && checkbox.checked) {
+                    const email = this.value.trim();
+                    const senha = senhaInput ? senhaInput.value : '';
+                    if (email && senha) {
+                        salvarCredenciaisLocalStorage(email, senha);
+                    }
+                }
+            });
+        }
+        
+        if (senhaInput) {
+            senhaInput.addEventListener('input', function() {
+                const checkbox = document.getElementById('salvarCredenciais');
+                if (checkbox && checkbox.checked) {
+                    const email = emailInput ? emailInput.value.trim() : '';
+                    const senha = this.value;
+                    if (email && senha) {
+                        salvarCredenciaisLocalStorage(email, senha);
+                    }
+                }
+            });
+        }
+        
+        console.log('Configuração do checkbox concluída');
+    }, 100); // Delay de 100ms para garantir carregamento completo
+    
     // Fechar modal ao clicar fora dele
     const modal = document.getElementById('forgotPasswordModal');
     if (modal) {
@@ -179,18 +452,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
-            const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
             const senhaInput = document.getElementById('senha');
             const loginBtn = document.getElementById('loginBtn');
             
             // Validações básicas
             let isValid = true;
             
-            if (!usernameInput.value.trim()) {
-                usernameInput.classList.add('is-invalid');
+            if (!emailInput.value.trim()) {
+                emailInput.classList.add('is-invalid');
                 isValid = false;
             } else {
-                usernameInput.classList.remove('is-invalid');
+                emailInput.classList.remove('is-invalid');
             }
             
             if (!senhaInput.value.trim()) {
@@ -206,6 +479,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+
+            
             // Mostrar loading
             loginBtn.classList.add('loading');
             loginBtn.disabled = true;
@@ -217,4 +492,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-} 
+}
+
+ 

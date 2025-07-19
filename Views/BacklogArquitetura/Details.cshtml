@@ -1,0 +1,519 @@
+@model Gerente.Models.BacklogArquitetura
+@{
+    ViewData["Title"] = "Detalhes do Backlog";
+    var anexos = ViewBag.Anexos as List<Gerente.Models.AnexoBacklog> ?? new List<Gerente.Models.AnexoBacklog>();
+    var comentarios = ViewBag.Comentarios as List<Gerente.Models.ComentarioBacklog> ?? new List<Gerente.Models.ComentarioBacklog>();
+}
+
+<!-- Sistema de Mensagens -->
+<div id="messageContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; display: none;">
+    <div id="messageAlert" class="alert alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i id="messageIcon" class="me-2"></i>
+            <span id="messageText"></span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-info-circle me-2"></i>
+            Detalhes do Backlog
+        </h1>
+        <div>
+            <a href="@Url.Action("Edit", "BacklogArquitetura", new { id = Model.Id })" class="btn btn-primary me-2">
+                <i class="bi bi-pencil me-2"></i>
+                Editar
+            </a>
+            <a href="@Url.Action("Index", "BacklogArquitetura")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>
+                Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informações Principais -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-card-text me-2"></i>
+                        Informações do Backlog
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Descrição da Tarefa:</label>
+                            <p class="form-control-plaintext">@Model.DescricaoTarefa</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Usuário Responsável:</label>
+                            <p class="form-control-plaintext">@Model.UsuarioNome</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Prioridade:</label>
+                            <div>
+                                @{
+                                    var prioridadeClass = Model.Prioridade switch
+                                    {
+                                        "Alta" => "badge bg-danger",
+                                        "Média" => "badge bg-warning",
+                                        "Baixa" => "badge bg-success",
+                                        _ => "badge bg-secondary"
+                                    };
+                                }
+                                <span class="@prioridadeClass">@Model.Prioridade</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Ganho:</label>
+                            <div>
+                                <span class="badge bg-info">@Model.Ganho</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Progresso:</label>
+                            <div>
+                                @{
+                                    var progressoClass = Model.Progresso switch
+                                    {
+                                        "Concluído" => "badge bg-success",
+                                        "Iniciado" => "badge bg-warning",
+                                        "Não Iniciado" => "badge bg-secondary",
+                                        _ => "badge bg-secondary"
+                                    };
+                                }
+                                <span class="@progressoClass">@Model.Progresso</span>
+                                @if (Model.DataConclusao.HasValue)
+                                {
+                                    <br><small class="text-muted">Concluído em: @Model.DataConclusao.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Data Início:</label>
+                            <p class="form-control-plaintext">
+                                @if (Model.DataInicio.HasValue)
+                                {
+                                    @Model.DataInicio.Value.ToString("dd/MM/yyyy")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Não definida</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Data Fim:</label>
+                            <p class="form-control-plaintext">
+                                @if (Model.DataFim.HasValue)
+                                {
+                                    @Model.DataFim.Value.ToString("dd/MM/yyyy")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Não definida</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Ambientes))
+                    {
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">Ambientes:</label>
+                                <p class="form-control-plaintext">
+                                    <i class="bi bi-tags me-1"></i>
+                                    @Model.Ambientes
+                                </p>
+                            </div>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.Anotacoes))
+                    {
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">Anotações:</label>
+                                <div class="form-control-plaintext" style="white-space: pre-wrap;">@Model.Anotacoes</div>
+                            </div>
+                        </div>
+                    }
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Data de Criação:</label>
+                            <p class="form-control-plaintext">@Model.DataCriacao.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Última Alteração:</label>
+                            <p class="form-control-plaintext">@Model.DataAlteracao.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Anexos -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-paperclip me-2"></i>
+                        Anexos (@anexos.Count)
+                    </h5>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="abrirModalAnexos()">
+                        <i class="bi bi-plus me-1"></i>
+                        Adicionar
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (anexos.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var anexo in anexos)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center p-2">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark me-2 text-primary"></i>
+                                            <div>
+                                                <div class="fw-medium">@anexo.NomeOriginal</div>
+                                                <small class="text-muted">
+                                                    @anexo.TamanhoFormatado • @anexo.DataUpload.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/uploads/@anexo.NomeArquivo" target="_blank" class="btn btn-outline-primary" title="Download">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" title="Excluir" onclick="excluirAnexo(@anexo.Id)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">
+                            <i class="bi bi-inbox display-6"></i><br>
+                            Nenhum anexo encontrado
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Comentários -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-chat-dots me-2"></i>
+                        Comentários (@comentarios.Count)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Formulário para novo comentário -->
+                    <div class="mb-4">
+                        <form id="formComentario">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <textarea class="form-control" id="novoComentario" rows="3" placeholder="Digite seu comentário..."></textarea>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-send me-2"></i>
+                                        Enviar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Lista de comentários -->
+                    <div id="listaComentarios">
+                        @if (comentarios.Any())
+                        {
+                            @foreach (var comentario in comentarios)
+                            {
+                                <div class="border rounded p-3 mb-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <span class="fw-bold">@comentario.UsuarioNome</span>
+                                            <small class="text-muted ms-2">@comentario.DataCriacao.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </div>
+                                    </div>
+                                    <div class="comentario-texto" style="white-space: pre-wrap;">@comentario.Comentario</div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center mb-0">
+                                <i class="bi bi-chat-dots display-6"></i><br>
+                                Nenhum comentário encontrado
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para adicionar anexos -->
+<div class="modal fade" id="modalAnexos" tabindex="-1" aria-labelledby="modalAnexosLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAnexosLabel">
+                    <i class="bi bi-paperclip me-2"></i>
+                    Adicionar Anexos
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAnexos" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="anexos" class="form-label">Selecionar arquivos:</label>
+                        <input type="file" class="form-control" id="anexos" name="anexos" multiple required>
+                        <div class="form-text">Você pode selecionar múltiplos arquivos.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarAnexos()">
+                    <i class="bi bi-upload me-2"></i>
+                    Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Função para exibir mensagens profissionais
+        function showMessage(type, message, duration = 5000) {
+            const container = document.getElementById('messageContainer');
+            const alert = document.getElementById('messageAlert');
+            const icon = document.getElementById('messageIcon');
+            const text = document.getElementById('messageText');
+            
+            // Remover classes anteriores
+            alert.className = 'alert alert-dismissible fade show';
+            
+            // Configurar tipo de mensagem
+            switch(type) {
+                case 'success':
+                    alert.classList.add('alert-success');
+                    icon.className = 'bi bi-check-circle-fill me-2';
+                    break;
+                case 'error':
+                    alert.classList.add('alert-danger');
+                    icon.className = 'bi bi-exclamation-triangle-fill me-2';
+                    break;
+                case 'warning':
+                    alert.classList.add('alert-warning');
+                    icon.className = 'bi bi-exclamation-circle-fill me-2';
+                    break;
+                case 'info':
+                    alert.classList.add('alert-info');
+                    icon.className = 'bi bi-info-circle-fill me-2';
+                    break;
+                default:
+                    alert.classList.add('alert-info');
+                    icon.className = 'bi bi-info-circle-fill me-2';
+            }
+            
+            text.textContent = message;
+            container.style.display = 'block';
+            
+            // Auto-hide após duração especificada
+            setTimeout(() => {
+                container.style.display = 'none';
+            }, duration);
+        }
+
+        // Função para confirmação profissional
+        function showConfirm(message, onConfirm, onCancel = null) {
+            const confirmModal = document.createElement('div');
+            confirmModal.className = 'modal fade';
+            confirmModal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-question-circle-fill me-2 text-primary"></i>
+                                Confirmação
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">${message}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-2"></i>
+                                Cancelar
+                            </button>
+                            <button type="button" class="btn btn-primary" id="confirmBtn">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmModal);
+            
+            const modal = new bootstrap.Modal(confirmModal);
+            modal.show();
+            
+            document.getElementById('confirmBtn').addEventListener('click', () => {
+                modal.hide();
+                if (onConfirm) onConfirm();
+            });
+            
+            confirmModal.addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(confirmModal);
+                if (onCancel) onCancel();
+            });
+        }
+
+        // Função para abrir modal de anexos
+        function abrirModalAnexos() {
+            $('#modalAnexos').modal('show');
+        }
+
+        // Função para enviar anexos
+        function enviarAnexos() {
+            const formData = new FormData();
+            const fileInput = document.getElementById('anexos');
+            
+            if (fileInput.files.length === 0) {
+                showConfirm('Nenhum arquivo foi selecionado. Gostaria de selecionar arquivos para anexar?', () => {
+                    fileInput.click();
+                });
+                return;
+            }
+
+            showMessage('info', 'Processando anexos. Aguarde um momento...');
+
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('anexos', fileInput.files[i]);
+            }
+
+            fetch('@Url.Action("AdicionarAnexo", "BacklogArquitetura", new { backlogId = Model.Id })', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    $('#modalAnexos').modal('hide');
+                    showMessage('success', 'Anexos adicionados com sucesso! A página será atualizada para exibir os novos anexos.');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showMessage('error', 'Ocorreu um erro ao processar os anexos. Deseja tentar novamente?');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showMessage('error', 'Erro de conexão ao enviar anexos. Verifique sua conexão e tente novamente.');
+            });
+        }
+
+        // Função para excluir anexo
+        function excluirAnexo(anexoId) {
+            showConfirm('Tem certeza que deseja excluir este anexo? Esta ação não pode ser desfeita.', () => {
+                const formData = new FormData();
+                formData.append('anexoId', anexoId);
+
+                showMessage('info', 'Processando exclusão do anexo...');
+
+                fetch('@Url.Action("ExcluirAnexo", "BacklogArquitetura")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('success', 'Anexo excluído com sucesso! A página será atualizada.');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        showMessage('error', 'Não foi possível excluir o anexo. Verifique suas permissões e tente novamente.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showMessage('error', 'Erro de conexão ao excluir anexo. Verifique sua conexão e tente novamente.');
+                });
+            });
+        }
+
+        // Função para adicionar comentário
+        document.getElementById('formComentario').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const comentario = document.getElementById('novoComentario').value.trim();
+            if (!comentario) {
+                showConfirm('O campo de comentário está vazio. Gostaria de adicionar um comentário?', () => {
+                    document.getElementById('novoComentario').focus();
+                });
+                return;
+            }
+
+            showMessage('info', 'Processando comentário. Aguarde um momento...');
+
+            const formData = new FormData();
+            formData.append('backlogId', @Model.Id);
+            formData.append('comentario', comentario);
+
+            fetch('@Url.Action("AdicionarComentario", "BacklogArquitetura")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('novoComentario').value = '';
+                    showMessage('success', 'Comentário adicionado com sucesso! A página será atualizada para exibir o novo comentário.');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showMessage('error', 'Ocorreu um erro ao adicionar o comentário. Deseja tentar novamente?');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showMessage('error', 'Erro de conexão ao adicionar comentário. Verifique sua conexão e tente novamente.');
+            });
+        });
+    </script>
+} 

@@ -21,6 +21,10 @@
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
+      "Id": "C:\\Projetos\\Gerente\\wwwroot\\js\\criarConta.js",
+      "PackagePath": "staticwebassets\\js\\criarConta.js"
+    },
+    {
       "Id": "C:\\Projetos\\Gerente\\wwwroot\\js\\login.js",
       "PackagePath": "staticwebassets\\js\\login.js"
     },
@@ -255,6 +259,18 @@
     {
       "Id": "C:\\Projetos\\Gerente\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
+    },
+    {
+      "Id": "C:\\Projetos\\Gerente\\wwwroot\\uploads\\26882815-e2f6-4983-ad09-82a465d972c5.png",
+      "PackagePath": "staticwebassets\\uploads\\26882815-e2f6-4983-ad09-82a465d972c5.png"
+    },
+    {
+      "Id": "C:\\Projetos\\Gerente\\wwwroot\\uploads\\6ab3053a-d4cb-4059-8adf-3dbf4ff5f8ad.pdf",
+      "PackagePath": "staticwebassets\\uploads\\6ab3053a-d4cb-4059-8adf-3dbf4ff5f8ad.pdf"
+    },
+    {
+      "Id": "C:\\Projetos\\Gerente\\wwwroot\\uploads\\847621ea-2ce6-494c-b5f8-5ff03ed4106b.png",
+      "PackagePath": "staticwebassets\\uploads\\847621ea-2ce6-494c-b5f8-5ff03ed4106b.png"
     },
     {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.Gerente.Microsoft.AspNetCore.StaticWebAssets.props",

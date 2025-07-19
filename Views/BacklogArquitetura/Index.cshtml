@@ -1,0 +1,303 @@
+@model List<Gerente.Models.BacklogArquitetura>
+
+@{
+    ViewData["Title"] = "Backlog Arquitetura e Projetos";
+}
+
+<!-- Sistema de Mensagens -->
+<div id="messageContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; display: none;">
+    <div id="messageAlert" class="alert alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i id="messageIcon" class="me-2"></i>
+            <span id="messageText"></span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-kanban me-2"></i>
+            Backlog Arquitetura e Projetos
+        </h1>
+        <a href="@Url.Action("Create", "BacklogArquitetura")" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>
+            Novo Backlog
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Descrição da Tarefa</th>
+                                <th>Prioridade</th>
+                                <th>Ganho</th>
+                                <th>Usuário</th>
+                                <th>Progresso</th>
+                                <th>Data Início</th>
+                                <th>Data Fim</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="@(item.Progresso == "Concluído" ? "table-success" : "")">
+                                    <td>
+                                        <div class="fw-medium @(item.Progresso == "Concluído" ? "text-decoration-line-through" : "")">@item.DescricaoTarefa</div>
+                                        @if (!string.IsNullOrEmpty(item.Ambientes))
+                                        {
+                                            <small class="text-muted @(item.Progresso == "Concluído" ? "text-decoration-line-through" : "")">
+                                                <i class="bi bi-tags me-1"></i>
+                                                @item.Ambientes
+                                            </small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @{
+                                            var prioridadeClass = item.Prioridade switch
+                                            {
+                                                "Alta" => "badge bg-danger",
+                                                "Média" => "badge bg-warning",
+                                                "Baixa" => "badge bg-success",
+                                                _ => "badge bg-secondary"
+                                            };
+                                        }
+                                        <span class="@prioridadeClass">@item.Prioridade</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@item.Ganho</span>
+                                    </td>
+                                    <td>@item.UsuarioNome</td>
+                                    <td>
+                                        @{
+                                            var progressoClass = item.Progresso switch
+                                            {
+                                                "Concluído" => "badge bg-success",
+                                                "Iniciado" => "badge bg-warning",
+                                                "Não Iniciado" => "badge bg-secondary",
+                                                _ => "badge bg-secondary"
+                                            };
+                                        }
+                                        <span class="@progressoClass">@item.Progresso</span>
+                                        @if (item.DataConclusao.HasValue)
+                                        {
+                                            <br><small class="text-muted">@item.DataConclusao.Value.ToString("dd/MM/yyyy")</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.DataInicio.HasValue)
+                                        {
+                                            @item.DataInicio.Value.ToString("dd/MM/yyyy")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.DataFim.HasValue)
+                                        {
+                                            @item.DataFim.Value.ToString("dd/MM/yyyy")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Details", "BacklogArquitetura", new { id = item.Id })" 
+                                               class="btn btn-sm btn-outline-info" 
+                                               title="Ver Detalhes">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("Edit", "BacklogArquitetura", new { id = item.Id })" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger" 
+                                                    title="Excluir"
+                                                    onclick="confirmarExclusao(@item.Id, '@item.DescricaoTarefa.Replace("'", "\\'")')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-kanban display-1 text-muted mb-3"></i>
+                <h4 class="text-muted">Nenhum backlog encontrado</h4>
+                <p class="text-muted">Clique no botão "Novo Backlog" para começar a criar seus backlogs.</p>
+                <a href="@Url.Action("Create", "BacklogArquitetura")" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Criar Primeiro Backlog
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+
+@section Scripts {
+    <script>
+        // Função para exibir mensagens profissionais
+        function showMessage(type, message, duration = 5000) {
+            const container = document.getElementById('messageContainer');
+            const alert = document.getElementById('messageAlert');
+            const icon = document.getElementById('messageIcon');
+            const text = document.getElementById('messageText');
+            
+            // Remover classes anteriores
+            alert.className = 'alert alert-dismissible fade show';
+            
+            // Configurar tipo de mensagem
+            switch(type) {
+                case 'success':
+                    alert.classList.add('alert-success');
+                    icon.className = 'bi bi-check-circle-fill me-2';
+                    break;
+                case 'error':
+                    alert.classList.add('alert-danger');
+                    icon.className = 'bi bi-exclamation-triangle-fill me-2';
+                    break;
+                case 'warning':
+                    alert.classList.add('alert-warning');
+                    icon.className = 'bi bi-exclamation-circle-fill me-2';
+                    break;
+                case 'info':
+                    alert.classList.add('alert-info');
+                    icon.className = 'bi bi-info-circle-fill me-2';
+                    break;
+                default:
+                    alert.classList.add('alert-info');
+                    icon.className = 'bi bi-info-circle-fill me-2';
+            }
+            
+            text.textContent = message;
+            container.style.display = 'block';
+            
+            // Auto-hide após duração especificada
+            setTimeout(() => {
+                container.style.display = 'none';
+            }, duration);
+        }
+
+        // Função para confirmação profissional
+        function showConfirm(message, onConfirm, onCancel = null) {
+            const confirmModal = document.createElement('div');
+            confirmModal.className = 'modal fade';
+            confirmModal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-question-circle-fill me-2 text-primary"></i>
+                                Confirmação
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">${message}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-2"></i>
+                                Cancelar
+                            </button>
+                            <button type="button" class="btn btn-primary" id="confirmBtn">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmModal);
+            
+            const modal = new bootstrap.Modal(confirmModal);
+            modal.show();
+            
+            document.getElementById('confirmBtn').addEventListener('click', () => {
+                modal.hide();
+                if (onConfirm) onConfirm();
+            });
+            
+            confirmModal.addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(confirmModal);
+                if (onCancel) onCancel();
+            });
+        }
+
+        // Adicionar tooltips aos botões
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Função para confirmar exclusão de tarefa
+        function confirmarExclusao(id, descricao) {
+            showConfirm('Deseja realmente excluir esta tarefa?', () => {
+                excluirTarefa(id);
+            });
+        }
+
+        // Função para excluir tarefa
+        function excluirTarefa(id) {
+            showMessage('info', 'Processando exclusão da tarefa...');
+
+            const formData = new FormData();
+            formData.append('id', id);
+
+            fetch('@Url.Action("Delete", "BacklogArquitetura")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('success', 'A tarefa foi excluída com sucesso.');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showMessage('error', data.message || 'Ocorreu um erro ao excluir a tarefa. Deseja tentar novamente?');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showMessage('error', 'Erro de conexão ao excluir tarefa. Verifique sua conexão e tente novamente.');
+            });
+        }
+
+        // Verificar se há mensagens do servidor para exibir
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se há mensagens de sucesso ou erro do TempData
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('success')) {
+                showMessage('success', 'A operação foi concluída com sucesso.');
+            }
+            if (urlParams.has('error')) {
+                showMessage('error', 'Ocorreu um erro ao processar a solicitação. Deseja tentar novamente?');
+            }
+        });
+    </script>
+} 

@@ -127,6 +127,24 @@
                         </div>
 
                         <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label d-block">
+                                    <i class="bi bi-toggle-on me-1"></i>
+                                    Status
+                                </label>
+                                <label class="switch-toggle">
+                                    <input asp-for="Ativo" type="checkbox" id="ativo" />
+                                    <span class="slider-toggle"></span>
+                                </label>
+                                <span asp-validation-for="Ativo" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Usuários inativos não conseguem fazer login no sistema
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-12">
                                 <div class="d-flex justify-content-end gap-2">
                                     <a href="@Url.Action("Index", "Usuario")" class="btn btn-outline-secondary">

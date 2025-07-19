@@ -5,6 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Adicionar HttpContextAccessor para acessar o contexto HTTP
+builder.Services.AddHttpContextAccessor();
+
 // Adicionar CORS para permitir requisições de arquivos locais
 builder.Services.AddCors(options =>
 {
@@ -38,6 +41,9 @@ builder.Services.AddScoped<PasswordResetService>();
 
 // Registrar o serviço de controle de acesso
 builder.Services.AddScoped<AccessControlService>();
+
+// Registrar o serviço de email
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 

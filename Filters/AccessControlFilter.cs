@@ -30,6 +30,7 @@ namespace Gerente.Filters
                 "configuracoes" => _accessControlService.HasAccessToConfigurations(userId.Value),
                 "usuarios" => _accessControlService.HasAccessToUsers(userId.Value),
                 "projetos" => _accessControlService.HasAccessToProjects(userId.Value),
+                "backlog_arquitetura" => _accessControlService.HasAccessToBacklogArquitetura(userId.Value),
                 "relatorios" => _accessControlService.HasAccessToReports(userId.Value),
                 "total" => _accessControlService.HasTotalAccess(userId.Value),
                 _ => false
@@ -79,6 +80,14 @@ namespace Gerente.Filters
         public RequireTotalAccessAttribute() : base(typeof(AccessControlFilter))
         {
             Arguments = new object[] { "total" };
+        }
+    }
+
+    public class RequireBacklogArquiteturaAccessAttribute : TypeFilterAttribute
+    {
+        public RequireBacklogArquiteturaAccessAttribute() : base(typeof(AccessControlFilter))
+        {
+            Arguments = new object[] { "backlog_arquitetura" };
         }
     }
 } 

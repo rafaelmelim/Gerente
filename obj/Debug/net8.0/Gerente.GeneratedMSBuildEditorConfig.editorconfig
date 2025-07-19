@@ -18,6 +18,22 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Projetos\Gerente
 build_property._RazorSourceGeneratorDebug = 
 
+[C:/Projetos/Gerente/Views/BacklogArquitetura/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQmFja2xvZ0FycXVpdGV0dXJhXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/BacklogArquitetura/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQmFja2xvZ0FycXVpdGV0dXJhXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/BacklogArquitetura/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQmFja2xvZ0FycXVpdGV0dXJhXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/BacklogArquitetura/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQmFja2xvZ0FycXVpdGV0dXJhXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Projetos/Gerente/Views/ConfiguracaoEmail/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29uZmlndXJhY2FvRW1haWxcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -34,12 +50,40 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Projetos/Gerente/Views/Login/CriarConta.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9naW5cQ3JpYXJDb250YS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Projetos/Gerente/Views/Login/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9naW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Projetos/Gerente/Views/Login/ResetPassword.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9naW5cUmVzZXRQYXNzd29yZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/ParametroAmbiente/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyYW1ldHJvQW1iaWVudGVcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/ParametroAmbiente/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyYW1ldHJvQW1iaWVudGVcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/ParametroAmbiente/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyYW1ldHJvQW1iaWVudGVcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/ParametroGanho/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyYW1ldHJvR2FuaG9cQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/ParametroGanho/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyYW1ldHJvR2FuaG9cRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/ParametroGanho/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFyYW1ldHJvR2FuaG9cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Projetos/Gerente/Views/ParametroSistema/Edit.cshtml]
@@ -60,6 +104,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Projetos/Gerente/Views/PerfilAcesso/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGVyZmlsQWNlc3NvXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/Projetos/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamV0b3NcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projetos/Gerente/Views/Relatorios/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVsYXRvcmlvc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Projetos/Gerente/Views/Shared/Error.cshtml]
